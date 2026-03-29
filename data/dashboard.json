@@ -1,0 +1,104 @@
+{
+  "timestamp": 1774820572415,
+  "services": [
+    {
+      "name": "mission-control",
+      "status": "inactive",
+      "backend": "systemd"
+    },
+    {
+      "name": "classvault",
+      "status": "unknown",
+      "backend": "pm2"
+    },
+    {
+      "name": "content-vault",
+      "status": "unknown",
+      "backend": "pm2"
+    },
+    {
+      "name": "postiz-simple",
+      "status": "unknown",
+      "backend": "pm2"
+    },
+    {
+      "name": "brain",
+      "status": "active",
+      "backend": "pm2",
+      "port": 3322,
+      "uptime": 116
+    },
+    {
+      "name": "creatoros",
+      "status": "not_deployed",
+      "backend": "none"
+    }
+  ],
+  "cronJobs": [
+    {
+      "name": "Mission Control Dashboard Auto-Update",
+      "status": "running",
+      "lastRun": 1774819800012
+    },
+    {
+      "name": "Activity Timeline Sync",
+      "status": "done",
+      "lastRun": 1774819124088
+    },
+    {
+      "name": "Dashboard Update",
+      "status": "running",
+      "lastRun": 1774807308449
+    },
+    {
+      "name": "Session PostgreSQL Sync",
+      "status": "running",
+      "lastRun": 1774807200011
+    },
+    {
+      "name": "Memorable dates reminder",
+      "status": "done",
+      "lastRun": 1774774800051
+    }
+  ],
+  "agents": [
+    {
+      "name": "Morzsa",
+      "emoji": "🍞",
+      "role": "Conductor",
+      "status": "running",
+      "model": "glm-5:cloud",
+      "sessions": 165
+    },
+    {
+      "name": "Pajti",
+      "emoji": "🔧",
+      "role": "Executor",
+      "status": "idle",
+      "model": "glm-5:cloud"
+    }
+  ],
+  "nodes": [
+    {
+      "name": "zsolt-pc",
+      "ip": "192.168.1.100",
+      "status": "online"
+    },
+    {
+      "name": "ugyelet-node",
+      "ip": "192.168.1.89",
+      "status": "online"
+    },
+    {
+      "name": "miki-pc",
+      "ip": "100.88.33.88",
+      "status": "online",
+      "type": "tailscale"
+    }
+  ],
+  "memory": {
+    "total": 2452,
+    "collections": 13,
+    "size": "13 MB"
+  }
+}
