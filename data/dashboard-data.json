@@ -1,19 +1,23 @@
 {
-  "lastUpdated": "2026-03-30T19:30:00Z",
+  "lastUpdated": "2026-03-30T20:00:00.000Z",
   "actionRequired": [
     {
-      "type": "error",
+      "level": "critical",
       "source": "cron",
-      "job": "Activity Timeline Sync",
-      "message": "20 consecutive errors - Telegram delivery requires target chatId",
-      "priority": "high"
+      "jobId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+      "name": "Activity Timeline Sync",
+      "issue": "20 consecutive errors",
+      "error": "Delivering to Telegram requires target <chatId>",
+      "suggestedFix": "Set delivery.to field in cron configuration"
     },
     {
-      "type": "warning",
+      "level": "warning",
       "source": "cron",
-      "job": "Weekly Review",
-      "message": "Outbound not configured for whatsapp channel",
-      "priority": "medium"
+      "jobId": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+      "name": "Weekly Review (Analyzer)",
+      "issue": "1 consecutive error",
+      "error": "Outbound not configured for channel: whatsapp",
+      "suggestedFix": "Configure WhatsApp outbound or change delivery channel"
     }
   ],
   "activeNow": [
@@ -21,148 +25,194 @@
       "sessionKey": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
       "label": "Mission Control Dashboard Auto-Update",
       "status": "running",
-      "startedAt": "2026-03-30T19:30:01Z",
-      "model": "glm-5:cloud"
+      "model": "glm-5:cloud",
+      "startedAt": "2026-03-30T20:00:01.349Z",
+      "tokens": 71789
     },
     {
       "sessionKey": "agent:pajti:cron:acd86258-87d7-4a08-aa09-26387c156dda",
       "label": "Dashboard Update",
       "status": "running",
-      "startedAt": "2026-03-30T17:23:00Z",
-      "model": "glm-5:cloud"
+      "model": "glm-5:cloud",
+      "tokens": 65754
+    },
+    {
+      "sessionKey": "agent:pajti:cron:fba27730-005a-48fe-b75d-02c48551dd69",
+      "label": "Session PostgreSQL Sync",
+      "status": "running",
+      "model": "glm-5:cloud",
+      "tokens": 10630
     }
   ],
-  "crons": {
-    "total": 38,
-    "enabled": 38,
-    "running": 2,
-    "errors": 2,
-    "jobs": [
-      {
-        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-        "name": "Mission Control Dashboard Auto-Update",
-        "schedule": "*/30 * * * *",
-        "enabled": true,
-        "lastStatus": "ok",
-        "lastRunAt": "2026-03-30T19:30:00Z",
-        "nextRunAt": "2026-03-30T20:30:00Z",
-        "consecutiveErrors": 0
-      },
-      {
-        "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-        "name": "Activity Timeline Sync",
-        "schedule": "*/5 * * * *",
-        "enabled": true,
-        "lastStatus": "error",
-        "lastError": "Delivering to Telegram requires target <chatId>",
-        "consecutiveErrors": 20
-      },
-      {
-        "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
-        "name": "Recipe Collector Daily Multilingual Fetch",
-        "schedule": "0 6 * * *",
-        "enabled": true,
-        "lastStatus": "ok",
-        "nextRunAt": "2026-03-31T04:00:00Z"
-      },
-      {
-        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
-        "name": "Recipe Collector Daily Fetch",
-        "schedule": "0 6 * * *",
-        "enabled": true,
-        "lastStatus": "ok"
-      },
-      {
-        "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
-        "name": "PostgreSQL Memory Backup",
-        "schedule": "0 3 * * *",
-        "enabled": true,
-        "lastStatus": "ok"
-      },
-      {
-        "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
-        "name": "Start of Day - Postgres Recall + Priorities",
-        "schedule": "30 6 * * 1-5",
-        "enabled": true,
-        "lastStatus": "ok"
-      },
-      {
-        "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
-        "name": "Munkaoptimalizálás - Daily Briefing",
-        "schedule": "30 7 * * 1-5",
-        "enabled": true,
-        "lastStatus": "ok"
-      },
-      {
-        "id": "acd86258-87d7-4a08-aa09-26387c156dda",
-        "name": "Dashboard Update",
-        "schedule": "0 6,18 * * *",
-        "enabled": true,
-        "lastStatus": "ok"
-      },
-      {
-        "id": "fba27730-005a-48fe-b75d-02c48551dd69",
-        "name": "Session PostgreSQL Sync",
-        "schedule": "0 6,18 * * *",
-        "enabled": true,
-        "lastStatus": "ok"
-      },
-      {
-        "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
-        "name": "Családi Események Emlékeztető",
-        "schedule": "0 9 * * *",
-        "enabled": true,
-        "lastStatus": "ok"
-      },
-      {
-        "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
-        "name": "Weekly Review",
-        "schedule": "0 18 * * 5",
-        "enabled": true,
-        "lastStatus": "error",
-        "lastError": "Outbound not configured for channel: whatsapp"
-      }
-    ]
-  },
+  "crons": [
+    {
+      "id": "2451cb36-cee9-48f4-b032-1086e387b078",
+      "name": "Mission Control Dashboard Auto-Update",
+      "schedule": "*/30 * * * *",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-30T20:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+      "name": "Activity Timeline Sync",
+      "schedule": "*/5 * * * *",
+      "enabled": true,
+      "lastStatus": "error",
+      "nextRun": "2026-03-30T20:02:45.922Z",
+      "consecutiveErrors": 20,
+      "lastError": "Delivering to Telegram requires target <chatId>"
+    },
+    {
+      "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
+      "name": "Recipe Collector Daily Multilingual Fetch",
+      "schedule": "0 6 * * * (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T04:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
+      "name": "Recipe Collector Daily Fetch",
+      "schedule": "0 6 * * * (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T04:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
+      "name": "recipe-collector-daily",
+      "schedule": "0 6 * * * (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T04:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
+      "name": "PostgreSQL Memory Backup",
+      "schedule": "0 3 * * *",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T03:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
+      "name": "Start of Day - Postgres Recall + Priorities",
+      "schedule": "30 6 * * 1-5 (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T04:30:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
+      "name": "Munkaoptimalizálás - Daily Briefing (Morzsa)",
+      "schedule": "30 7 * * 1-5 (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T05:30:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "acd86258-87d7-4a08-aa09-26387c156dda",
+      "name": "Dashboard Update",
+      "schedule": "0 6,18 * * *",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T06:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "fba27730-005a-48fe-b75d-02c48551dd69",
+      "name": "Session PostgreSQL Sync",
+      "schedule": "0 6,18 * * *",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T06:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
+      "name": "Családi Események Emlékeztető",
+      "schedule": "0 9 * * *",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-03-31T09:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+      "name": "Munkaoptimalizálás - Weekly Review (Analyzer)",
+      "schedule": "0 18 * * 5 (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "error",
+      "nextRun": "2026-04-04T15:00:00.000Z",
+      "consecutiveErrors": 1,
+      "lastError": "Outbound not configured for channel: whatsapp"
+    },
+    {
+      "id": "2d071f9b-0f3b-4d74-9a7d-43cc9e6da7e2",
+      "name": "Munkaoptimalizálás - Full System Optimization",
+      "schedule": "0 20 * * 0 (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-04-05T17:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "a03b6584-87f8-45f6-a496-3879546d9e03",
+      "name": "Memória Cleanup + Index Rebuild",
+      "schedule": "0 21 * * 0 (Europe/Bucharest)",
+      "enabled": true,
+      "lastStatus": "ok",
+      "nextRun": "2026-04-05T18:00:00.000Z",
+      "consecutiveErrors": 0
+    }
+  ],
   "recentActivity": [
     {
-      "timestamp": "2026-03-30T19:30:00Z",
+      "time": "2026-03-30T20:00:00.000Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running"
     },
     {
-      "timestamp": "2026-03-30T19:15:00Z",
-      "type": "session",
-      "name": "WhatsApp session",
-      "status": "done",
-      "duration": "8.4s"
+      "time": "2026-03-30T19:54:38.639Z",
+      "type": "heartbeat",
+      "name": "Heartbeat check",
+      "status": "done"
     },
     {
-      "timestamp": "2026-03-30T19:10:00Z",
-      "type": "cron",
-      "name": "Activity Timeline Sync",
-      "status": "error"
-    },
-    {
-      "timestamp": "2026-03-30T18:56:00Z",
-      "type": "session",
+      "time": "2026-03-30T19:40:08.324Z",
+      "type": "telegram",
       "name": "Telegram session",
       "status": "done",
-      "duration": "72.2s"
+      "duration": "72s"
     },
     {
-      "timestamp": "2026-03-30T18:30:00Z",
+      "time": "2026-03-30T18:00:00.000Z",
       "type": "cron",
       "name": "Dashboard Update",
-      "status": "running"
+      "status": "ok"
+    },
+    {
+      "time": "2026-03-30T18:00:00.000Z",
+      "type": "cron",
+      "name": "Session PostgreSQL Sync",
+      "status": "ok"
     }
   ],
   "stats": {
-    "sessionsTotal": 188,
-    "cronsTotal": 38,
-    "cronsEnabled": 38,
-    "cronsError": 2,
-    "activeSessions": 2
+    "totalCrons": 38,
+    "activeCrons": 38,
+    "errorCrons": 2,
+    "totalSessions": 20,
+    "runningSessions": 3,
+    "model": "glm-5:cloud"
   }
 }
