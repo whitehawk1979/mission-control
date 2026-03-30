@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-30T20:30:00.000Z",
+  "lastUpdated": "2026-03-30T21:00:00.000Z",
   "systemStatus": {
     "gateway": "online",
     "postgres": "online",
@@ -27,29 +27,17 @@
       "label": "Mission Control Dashboard Auto-Update",
       "status": "running",
       "model": "glm-5:cloud",
-      "startedAt": "2026-03-30T20:30:00Z"
-    },
-    {
-      "sessionKey": "agent:pajti:cron:acd86258-87d7-4a08-aa09-26387c156dda",
-      "label": "Dashboard Update",
-      "status": "running",
-      "model": "glm-5:cloud"
-    },
-    {
-      "sessionKey": "agent:pajti:cron:fba27730-005a-48fe-b75d-02c48551dd69",
-      "label": "Session PostgreSQL Sync",
-      "status": "running",
-      "model": "glm-5:cloud"
+      "startedAt": "2026-03-30T21:00:00Z"
     }
   ],
   "crons": {
-    "total": 44,
+    "total": 38,
     "enabled": 38,
-    "disabled": 6,
+    "disabled": 0,
     "status": {
-      "ok": 32,
+      "ok": 33,
       "error": 2,
-      "pending": 6
+      "pending": 3
     },
     "jobs": [
       {
@@ -57,9 +45,9 @@
         "name": "Mission Control Dashboard Auto-Update",
         "schedule": "*/30 * * * *",
         "status": "ok",
-        "lastRun": "2026-03-30T20:00:00Z",
-        "nextRun": "2026-03-30T20:30:00Z",
-        "duration": 89634,
+        "lastRun": "2026-03-30T21:00:00Z",
+        "nextRun": "2026-03-30T21:30:00Z",
+        "duration": 90136,
         "consecutiveErrors": 0
       },
       {
@@ -67,8 +55,8 @@
         "name": "Activity Timeline Sync",
         "schedule": "*/5 * * * *",
         "status": "error",
-        "lastRun": "2026-03-30T20:02:45Z",
-        "nextRun": "2026-03-30T20:04:45Z",
+        "lastRun": "2026-03-30T20:56:05Z",
+        "nextRun": "2026-03-30T21:04:45Z",
         "duration": 120003,
         "consecutiveErrors": 21,
         "lastError": "cron: job execution timed out"
@@ -78,7 +66,7 @@
         "name": "Recipe Collector Daily Multilingual Fetch",
         "schedule": "0 6 * * * (Europe/Bucharest)",
         "status": "ok",
-        "lastRun": "2026-03-29T06:00:00Z",
+        "lastRun": "2026-03-30T06:00:00Z",
         "nextRun": "2026-03-31T06:00:00Z",
         "duration": 201426,
         "consecutiveErrors": 0
@@ -88,7 +76,7 @@
         "name": "Recipe Collector Daily Fetch",
         "schedule": "0 6 * * * (Europe/Bucharest)",
         "status": "ok",
-        "lastRun": "2026-03-29T06:00:00Z",
+        "lastRun": "2026-03-30T06:00:00Z",
         "nextRun": "2026-03-31T06:00:00Z",
         "duration": 235804,
         "consecutiveErrors": 0
@@ -188,14 +176,14 @@
   },
   "recentActivity": [
     {
-      "timestamp": "2026-03-30T20:30:00Z",
+      "timestamp": "2026-03-30T21:00:00Z",
       "type": "cron",
       "agent": "morzsa",
       "action": "Mission Control Dashboard Auto-Update started",
       "status": "running"
     },
     {
-      "timestamp": "2026-03-30T20:04:45Z",
+      "timestamp": "2026-03-30T20:56:05Z",
       "type": "cron",
       "agent": "morzsa",
       "action": "Activity Timeline Sync timeout",
@@ -224,9 +212,9 @@
     }
   ],
   "stats": {
-    "totalSessions": 20,
-    "activeSessions": 3,
+    "totalSessions": 10,
+    "activeSessions": 1,
     "recentSubagents": 85,
-    "lastHeartbeat": "2026-03-30T20:31:21Z"
+    "lastHeartbeat": "2026-03-30T21:00:00Z"
   }
 }
