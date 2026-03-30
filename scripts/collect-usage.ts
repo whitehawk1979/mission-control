@@ -29,6 +29,15 @@ interface Session {
   subagents?: number;
 }
 
+interface BrainStatus {
+  service: string;
+  version: string;
+  uptime: number;
+  memoryMB: number;
+  uptimeMinutes: number;
+  tools: Array<{ name: string; description: string }>;
+}
+
 interface DashboardData {
   lastUpdated: string;
   lastUpdatedHuman: string;
@@ -55,6 +64,13 @@ interface DashboardData {
     tokens?: number;
     subagents?: number;
   }>;
+  brain: {
+    status: string;
+    uptimeMinutes?: number;
+    memoryMB?: number;
+    tools?: Array<{ name: string; description: string }>;
+    lastActivity?: string;
+  };
   crons: {
     total: number;
     enabled: number;
@@ -101,7 +117,7 @@ interface DashboardData {
 
 // OpenClaw API base URL (internal)
 const GATEWAY_URL = process.env.GATEWAY_URL || 'http://127.0.0.1:18789';
-const GATEWAY_TOKEN = process.env.GATEWAY_TOKEN || '';
+const GATEWAY_TOKEN = process.env.GATEWAY_TOKEN || 'LanToken-2026-OK';
 
 async function fetchGatewayAPI(endpoint: string): Promise<any> {
   const url = `${GATEWAY_URL}${endpoint}`;
@@ -139,6 +155,30 @@ async function collectSessions(): Promise<Session[]> {
   }
 }
 
+async function collectBrainStatus(): Promise<BrainStatus | null> {
+  try {
+    const res = await fetch('http://localhost:3000/api/brain', {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) {
+      console.error('Brain API error:', res.status);
+      return null;
+    }
+    const data = await res.json();
+    return {
+      service: data.brainStatus?.service || 'brain',
+      version: data.brainStatus?.version || '1.0.0',
+      uptime: data.brainStatus?.uptime || 0,
+      memoryMB: data.brainStatus?.memoryMB || 0,
+      uptimeMinutes: data.brainStatus?.uptimeMinutes || 0,
+      tools: data.tools || [],
+    };
+  } catch (error) {
+    console.error('Failed to fetch Brain status:', error);
+    return null;
+  }
+}
+
 function formatDuration(ms: number): string {
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -160,7 +200,7 @@ function getHumanTimestamp(): string {
   });
 }
 
-async function buildDashboardData(crons: CronJob[], sessions: Session[]): Promise<DashboardData> {
+async function buildDashboardData(crons: CronJob[], sessions: Session[], brain: BrainStatus | null): Promise<DashboardData> {
   const now = new Date().toISOString();
   
   // Count cron statuses
@@ -272,6 +312,13 @@ async function buildDashboardData(crons: CronJob[], sessions: Session[]): Promis
     },
     actionRequired,
     activeNow,
+    brain: {
+      status: brain ? 'connected' : 'disconnected',
+      uptimeMinutes: brain?.uptimeMinutes,
+      memoryMB: brain?.memoryMB,
+      tools: brain?.tools,
+      lastActivity: brain ? new Date().toISOString() : undefined,
+    },
     crons: {
       total: totalCrons,
       enabled: enabledCrons,
@@ -321,9 +368,13 @@ async function main(): Promise<void> {
   const sessions = await collectSessions();
   console.log(`   Found ${sessions.length} sessions`);
   
+  console.log('🧠 Collecting Brain status...');
+  const brain = await collectBrainStatus();
+  console.log(`   Brain: ${brain ? 'connected' : 'disconnected'}`);
+  
   // Build dashboard data
   console.log('\n🔧 Building dashboard data...');
-  const dashboardData = await buildDashboardData(crons, sessions);
+  const dashboardData = await buildDashboardData(crons, sessions, brain);
   
   // Save to file
   await saveDashboardData(dashboardData);
@@ -334,6 +385,11 @@ async function main(): Promise<void> {
   console.log(`   Healthy: ${dashboardData.stats.healthyCrons}`);
   console.log(`   Errors: ${dashboardData.stats.errorCrons}`);
   console.log(`   Active sessions: ${dashboardData.stats.activeSessions}`);
+  console.log(`   Brain status: ${dashboardData.brain.status}`);
+  if (brain) {
+    console.log(`   Brain uptime: ${brain.uptimeMinutes} minutes`);
+    console.log(`   Brain memory: ${brain.memoryMB} MB`);
+  }
   
   if (dashboardData.systemHealth.status !== 'healthy') {
     console.log(`\n⚠️  System status: ${dashboardData.systemHealth.status.toUpperCase()}`);

@@ -1,230 +1,253 @@
 {
-  "lastUpdated": "2026-03-30T09:30:00Z",
+  "lastUpdated": "2026-03-30T10:00:00.000Z",
+  "generatedAt": "2026-03-30T10:00:00Z",
   "actionRequired": [
     {
-      "level": "critical",
+      "type": "error",
       "source": "cron",
       "jobId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-      "name": "Activity Timeline Sync",
-      "issue": "10 consecutive errors - timeout",
-      "lastRunAt": "2026-03-30T09:33:41Z",
-      "recommendation": "Check script execution or increase timeout"
+      "message": "Activity Timeline Sync: 10 consecutive timeouts",
+      "severity": "high",
+      "suggestedAction": "Review timeout settings or script performance"
     },
     {
-      "level": "warning",
+      "type": "error",
       "source": "cron",
       "jobId": "3231b7b1-a328-4218-9998-1b3fe1983d09",
-      "name": "Weekly Review",
-      "issue": "Outbound not configured for channel: whatsapp",
-      "lastRunAt": "2026-03-26T18:00:00Z",
-      "recommendation": "Configure WhatsApp outbound or change channel"
+      "message": "Weekly Review: WhatsApp outbound not configured",
+      "severity": "medium",
+      "suggestedAction": "Configure WhatsApp delivery or change channel to Telegram"
     }
   ],
-  "activeNow": [
-    {
-      "sessionKey": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
-      "label": "Cron: Mission Control Dashboard Auto-Update",
-      "status": "running",
-      "model": "glm-5:cloud",
-      "startedAt": "2026-03-30T09:30:00Z"
-    },
-    {
-      "sessionKey": "agent:morzsa:whatsapp:direct:+40770194845",
-      "label": "WhatsApp Direct",
-      "status": "running",
-      "model": "glm-5:cloud",
-      "startedAt": "2026-03-30T09:30:00Z"
-    },
-    {
-      "sessionKey": "agent:morzsa:cron:434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-      "label": "Cron: Activity Timeline Sync",
-      "status": "running",
-      "model": "glm-5:cloud",
-      "startedAt": "2026-03-30T09:33:42Z"
-    }
-  ],
-  "crons": [
-    {
-      "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-      "name": "Mission Control Dashboard Auto-Update",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "*/30 * * * *",
-      "nextRun": "2026-03-30T10:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-      "name": "Activity Timeline Sync",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "*/5 * * * *",
-      "nextRun": "2026-03-30T09:55:42Z",
-      "lastStatus": "error",
-      "consecutiveErrors": 10,
-      "lastError": "timeout"
-    },
-    {
-      "id": "acd86258-87d7-4a08-aa09-26387c156dda",
-      "name": "Dashboard Update",
-      "agentId": "pajti",
-      "enabled": true,
-      "schedule": "0 6,18 * * *",
-      "nextRun": "2026-03-30T18:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "fba27730-005a-48fe-b75d-02c48551dd69",
-      "name": "Session PostgreSQL Sync",
-      "agentId": "pajti",
-      "enabled": true,
-      "schedule": "0 6,18 * * *",
-      "nextRun": "2026-03-30T18:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
-      "name": "Recipe Collector Daily Multilingual Fetch",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "0 6 * * *",
-      "nextRun": "2026-03-31T04:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
-      "name": "Recipe Collector Daily Fetch",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "0 6 * * *",
-      "nextRun": "2026-03-31T04:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
-      "name": "recipe-collector-daily",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "0 6 * * *",
-      "nextRun": "2026-03-31T04:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
-      "name": "PostgreSQL Memory Backup",
-      "agentId": "pajti",
-      "enabled": true,
-      "schedule": "0 3 * * *",
-      "nextRun": "2026-03-31T03:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
-      "name": "Start of Day - Postgres Recall + Priorities",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "30 6 * * 1-5",
-      "nextRun": "2026-03-31T04:30:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
-      "name": "Daily Briefing (Morzsa)",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "30 7 * * 1-5",
-      "nextRun": "2026-03-31T05:30:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
-      "name": "Családi Események Emlékeztető",
-      "agentId": "pajti",
-      "enabled": true,
-      "schedule": "0 9 * * *",
-      "nextRun": "2026-03-31T09:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
-      "name": "Weekly Review (Analyzer)",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "0 18 * * 5",
-      "nextRun": "2026-04-03T15:00:00Z",
-      "lastStatus": "error",
-      "consecutiveErrors": 1,
-      "lastError": "Outbound not configured for channel: whatsapp"
-    },
-    {
-      "id": "2d071f9b-0f3b-4d74-9a7d-43cc9e6da7e2",
-      "name": "Full System Optimization (Improver)",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "0 20 * * 0",
-      "nextRun": "2026-04-05T17:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "a03b6584-87f8-45f6-a496-3879546d9e03",
-      "name": "Memória Cleanup + Index Rebuild",
-      "agentId": "morzsa",
-      "enabled": true,
-      "schedule": "0 21 * * 0",
-      "nextRun": "2026-04-05T18:00:00Z",
-      "lastStatus": "ok",
-      "consecutiveErrors": 0
-    }
-  ],
+  "activeNow": {
+    "count": 4,
+    "sessions": [
+      {
+        "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
+        "label": "Mission Control Dashboard Auto-Update",
+        "status": "running",
+        "startedAt": "2026-03-30T10:00:01Z",
+        "model": "glm-5:cloud"
+      },
+      {
+        "key": "agent:morzsa:cron:434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+        "label": "Activity Timeline Sync",
+        "status": "running",
+        "startedAt": "2026-03-30T09:53:43Z",
+        "model": "glm-5:cloud"
+      },
+      {
+        "key": "agent:pajti:cron:acd86258-87d7-4a08-aa09-26387c156dda",
+        "label": "Dashboard Update",
+        "status": "running",
+        "startedAt": "2026-03-30T06:03:00Z",
+        "model": "glm-5:cloud"
+      },
+      {
+        "key": "agent:pajti:cron:fba27730-005a-48fe-b75d-02c48551dd69",
+        "label": "Session PostgreSQL Sync",
+        "status": "running",
+        "startedAt": "2026-03-30T06:00:03Z",
+        "model": "glm-5:cloud"
+      }
+    ]
+  },
+  "crons": {
+    "total": 38,
+    "enabled": 38,
+    "healthy": 36,
+    "error": 2,
+    "jobs": [
+      {
+        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
+        "name": "Mission Control Dashboard Auto-Update",
+        "agentId": "morzsa",
+        "schedule": "*/30 * * * *",
+        "status": "ok",
+        "lastRun": "2026-03-30T10:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 131885,
+        "nextRun": "2026-03-30T10:30:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+        "name": "Activity Timeline Sync",
+        "agentId": "morzsa",
+        "schedule": "*/5 * * * *",
+        "status": "error",
+        "lastRun": "2026-03-30T09:53:41Z",
+        "lastStatus": "error",
+        "lastError": "timeout",
+        "lastDurationMs": 120594,
+        "nextRun": "2026-03-30T10:05:00Z",
+        "consecutiveErrors": 10
+      },
+      {
+        "id": "acd86258-87d7-4a08-aa09-26387c156dda",
+        "name": "Dashboard Update",
+        "agentId": "pajti",
+        "schedule": "0 6,18 * * *",
+        "status": "ok",
+        "lastRun": "2026-03-30T06:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 176571,
+        "nextRun": "2026-03-30T18:00:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "fba27730-005a-48fe-b75d-02c48551dd69",
+        "name": "Session PostgreSQL Sync",
+        "agentId": "pajti",
+        "schedule": "0 6,18 * * *",
+        "status": "ok",
+        "lastRun": "2026-03-30T06:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 91774,
+        "nextRun": "2026-03-30T18:00:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
+        "name": "Recipe Collector Daily Multilingual Fetch",
+        "agentId": "morzsa",
+        "schedule": "0 6 * * * (Europe/Bucharest)",
+        "status": "ok",
+        "lastRun": "2026-03-30T06:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 201426,
+        "nextRun": "2026-03-31T06:00:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
+        "name": "Recipe Collector Daily Fetch",
+        "agentId": "morzsa",
+        "schedule": "0 6 * * * (Europe/Bucharest)",
+        "status": "ok",
+        "lastRun": "2026-03-30T06:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 235804,
+        "nextRun": "2026-03-31T06:00:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
+        "name": "recipe-collector-daily",
+        "agentId": "morzsa",
+        "schedule": "0 6 * * * (Europe/Bucharest)",
+        "status": "ok",
+        "lastRun": "2026-03-30T06:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 106959,
+        "nextRun": "2026-03-31T06:00:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
+        "name": "PostgreSQL Memory Backup",
+        "agentId": "pajti",
+        "schedule": "0 3 * * *",
+        "status": "ok",
+        "lastRun": "2026-03-30T03:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 19853,
+        "nextRun": "2026-03-31T03:00:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
+        "name": "Start of Day - Postgres Recall + Priorities",
+        "agentId": "morzsa",
+        "schedule": "30 6 * * 1-5 (Europe/Bucharest)",
+        "status": "ok",
+        "lastRun": "2026-03-30T06:35:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 55115,
+        "nextRun": "2026-03-31T06:30:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
+        "name": "Daily Briefing (Morzsa)",
+        "agentId": "morzsa",
+        "schedule": "30 7 * * 1-5 (Europe/Bucharest)",
+        "status": "ok",
+        "lastRun": "2026-03-30T07:30:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 122249,
+        "nextRun": "2026-03-31T07:30:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
+        "name": "Családi Események Emlékeztető",
+        "agentId": "pajti",
+        "schedule": "0 9 * * *",
+        "status": "ok",
+        "lastRun": "2026-03-30T09:00:00Z",
+        "lastStatus": "ok",
+        "lastDurationMs": 122383,
+        "nextRun": "2026-03-31T09:00:00Z",
+        "consecutiveErrors": 0
+      },
+      {
+        "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+        "name": "Weekly Review (Analyzer)",
+        "agentId": "morzsa",
+        "schedule": "0 18 * * 5 (Europe/Bucharest)",
+        "status": "error",
+        "lastRun": "2026-03-28T18:00:00Z",
+        "lastStatus": "error",
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "nextRun": "2026-04-04T18:00:00Z",
+        "consecutiveErrors": 1
+      }
+    ]
+  },
   "recentActivity": [
     {
-      "timestamp": "2026-03-30T09:30:00Z",
+      "timestamp": "2026-03-30T10:00:00Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
-      "status": "running"
+      "status": "running",
+      "agentId": "morzsa"
     },
     {
-      "timestamp": "2026-03-30T09:33:42Z",
+      "timestamp": "2026-03-30T09:53:41Z",
       "type": "cron",
       "name": "Activity Timeline Sync",
-      "status": "running"
+      "status": "error",
+      "agentId": "morzsa",
+      "error": "timeout"
     },
     {
       "timestamp": "2026-03-30T09:00:00Z",
       "type": "cron",
       "name": "Családi Események Emlékeztető",
-      "status": "ok"
+      "status": "ok",
+      "agentId": "pajti"
     },
     {
-      "timestamp": "2026-03-30T08:04:00Z",
-      "type": "heartbeat",
-      "name": "Start of Day",
-      "status": "ok"
-    },
-    {
-      "timestamp": "2026-03-30T06:01:00Z",
+      "timestamp": "2026-03-30T07:30:00Z",
       "type": "cron",
-      "name": "Dashboard Update",
-      "status": "ok"
+      "name": "Daily Briefing (Morzsa)",
+      "status": "ok",
+      "agentId": "morzsa"
+    },
+    {
+      "timestamp": "2026-03-30T06:35:00Z",
+      "type": "cron",
+      "name": "Start of Day - Postgres Recall",
+      "status": "ok",
+      "agentId": "morzsa"
     }
   ],
-  "summary": {
-    "totalCrons": 38,
-    "activeCrons": 38,
-    "enabledCrons": 38,
+  "systemHealth": {
+    "overall": "warning",
+    "issues": 2,
+    "healthyCrons": 36,
     "errorCrons": 2,
-    "runningSessions": 3,
-    "totalSessions": 169
+    "lastBackup": "2026-03-30T03:00:00Z"
   }
 }
