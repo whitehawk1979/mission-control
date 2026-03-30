@@ -1,27 +1,29 @@
 {
-  "lastUpdated": "2026-03-30T18:00:00.000Z",
-  "generatedAt": "2026-03-30T18:00:00Z",
+  "lastUpdated": "2026-03-30T18:02:00.000Z",
+  "generatedAt": "2026-03-30T18:02 UTC",
   "actionRequired": [
     {
       "severity": "error",
       "source": "Activity Timeline Sync",
       "message": "18 consecutive errors - Telegram delivery requires chatId",
-      "cronId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b"
-    },
-    {
-      "severity": "warning",
-      "source": "Weekly Review",
-      "message": "Last run failed - WhatsApp outbound not configured",
-      "cronId": "3231b7b1-a328-4218-9998-1b3fe1983d09"
+      "cronId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+      "suggestion": "Add delivery.to parameter with Telegram chat ID"
     }
   ],
   "activeNow": {
     "running": [
       {
+        "sessionId": "2bc1931d-4edf-4024-a103-47b16951a605",
+        "label": "Cron: Mission Control Dashboard Auto-Update",
+        "status": "running",
+        "startedAt": "2026-03-30T18:02:16Z",
+        "model": "glm-5:cloud"
+      },
+      {
         "sessionId": "91c3abd7-967f-4076-b29c-e4f9d2867f5e",
         "label": "Cron: Dashboard Update",
         "status": "running",
-        "startedAt": "2026-03-30T18:00:20Z",
+        "startedAt": "2026-03-30T18:00:00Z",
         "model": "glm-5:cloud"
       },
       {
@@ -40,16 +42,16 @@
         "endedAt": "2026-03-30T17:27:49Z"
       },
       {
-        "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
-        "label": "Cron: Mission Control Dashboard Auto-Update",
-        "status": "failed",
-        "endedAt": "2026-03-30T17:00:45Z"
-      },
-      {
         "key": "agent:morzsa:cron:434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
         "label": "Cron: Activity Timeline Sync",
         "status": "done",
         "endedAt": "2026-03-30T16:51:02Z"
+      },
+      {
+        "key": "agent:morzsa:whatsapp:direct:+40770194845",
+        "displayName": "WhatsApp session",
+        "status": "done",
+        "endedAt": "2026-03-30T16:49:21Z"
       }
     ]
   },
@@ -59,28 +61,30 @@
       "name": "Mission Control Dashboard Auto-Update",
       "schedule": "*/30 * * * *",
       "enabled": true,
-      "lastStatus": "error",
-      "lastError": "timeout",
-      "consecutiveErrors": 1,
-      "nextRun": "2026-03-30T18:00:00Z"
+      "lastStatus": "ok",
+      "lastRun": "2026-03-30T17:30:00Z",
+      "nextRun": "2026-03-30T18:00:00Z",
+      "running": true
     },
     {
       "id": "acd86258-87d7-4a08-aa09-26387c156dda",
       "name": "Dashboard Update",
       "schedule": "0 6,18 * * *",
       "enabled": true,
-      "lastStatus": "running",
-      "currentRun": "2026-03-30T18:00:00Z",
-      "nextRun": "2026-03-31T06:00:00Z"
+      "lastStatus": "ok",
+      "lastRun": "2026-03-30T17:00:00Z",
+      "nextRun": "2026-03-31T06:00:00Z",
+      "running": true
     },
     {
       "id": "fba27730-005a-48fe-b75d-02c48551dd69",
       "name": "Session PostgreSQL Sync",
       "schedule": "0 6,18 * * *",
       "enabled": true,
-      "lastStatus": "running",
-      "currentRun": "2026-03-30T18:00:00Z",
-      "nextRun": "2026-03-31T06:00:00Z"
+      "lastStatus": "ok",
+      "lastRun": "2026-03-30T06:00:00Z",
+      "nextRun": "2026-03-31T06:00:00Z",
+      "running": true
     },
     {
       "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
@@ -97,8 +101,8 @@
       "name": "Recipe Collector Daily Multilingual Fetch",
       "schedule": "0 6 * * * (Europe/Bucharest)",
       "enabled": true,
-      "lastStatus": "error",
-      "lastRun": "2026-03-29T06:00:00Z",
+      "lastStatus": "ok",
+      "lastRun": "2026-03-30T06:00:00Z",
       "nextRun": "2026-03-31T06:00:00Z"
     },
     {
@@ -106,17 +110,8 @@
       "name": "Recipe Collector Daily Fetch",
       "schedule": "0 6 * * * (Europe/Bucharest)",
       "enabled": true,
-      "lastStatus": "error",
-      "lastRun": "2026-03-29T06:00:00Z",
-      "nextRun": "2026-03-31T06:00:00Z"
-    },
-    {
-      "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
-      "name": "recipe-collector-daily",
-      "schedule": "0 6 * * * (Europe/Bucharest)",
-      "enabled": true,
-      "lastStatus": "error",
-      "lastRun": "2026-03-29T06:00:00Z",
+      "lastStatus": "ok",
+      "lastRun": "2026-03-30T06:00:00Z",
       "nextRun": "2026-03-31T06:00:00Z"
     },
     {
@@ -134,6 +129,7 @@
       "schedule": "30 6 * * 1-5 (Europe/Bucharest)",
       "enabled": true,
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T06:30:00Z",
       "nextRun": "2026-03-31T06:30:00Z"
     },
     {
@@ -142,6 +138,7 @@
       "schedule": "30 7 * * 1-5 (Europe/Bucharest)",
       "enabled": true,
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T07:30:00Z",
       "nextRun": "2026-03-31T07:30:00Z"
     },
     {
@@ -150,6 +147,7 @@
       "schedule": "0 9 * * *",
       "enabled": true,
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T09:00:00Z",
       "nextRun": "2026-03-31T09:00:00Z"
     },
     {
@@ -159,6 +157,7 @@
       "enabled": true,
       "lastStatus": "error",
       "lastError": "Outbound not configured for channel: whatsapp",
+      "lastRun": "2026-03-27T18:00:00Z",
       "nextRun": "2026-04-04T18:00:00Z"
     },
     {
@@ -167,6 +166,7 @@
       "schedule": "0 20 * * 0 (Europe/Bucharest)",
       "enabled": true,
       "lastStatus": "ok",
+      "lastRun": "2026-03-23T20:00:00Z",
       "nextRun": "2026-04-06T20:00:00Z"
     },
     {
@@ -175,12 +175,19 @@
       "schedule": "0 21 * * 0 (Europe/Bucharest)",
       "enabled": true,
       "lastStatus": "ok",
+      "lastRun": "2026-03-23T21:00:00Z",
       "nextRun": "2026-04-06T21:00:00Z"
     }
   ],
   "recentActivity": [
     {
-      "timestamp": "2026-03-30T18:00:20Z",
+      "timestamp": "2026-03-30T18:02:16Z",
+      "type": "cron",
+      "name": "Mission Control Dashboard Auto-Update",
+      "status": "running"
+    },
+    {
+      "timestamp": "2026-03-30T18:00:00Z",
       "type": "cron",
       "name": "Dashboard Update",
       "status": "running"
@@ -192,34 +199,16 @@
       "status": "running"
     },
     {
-      "timestamp": "2026-03-30T17:30:01Z",
+      "timestamp": "2026-03-30T17:30:00Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
-      "status": "failed"
+      "status": "ok"
     },
     {
       "timestamp": "2026-03-30T17:27:49Z",
       "type": "session",
       "name": "heartbeat",
       "status": "done"
-    },
-    {
-      "timestamp": "2026-03-30T16:51:02Z",
-      "type": "cron",
-      "name": "Activity Timeline Sync",
-      "status": "done"
-    },
-    {
-      "timestamp": "2026-03-30T09:00:00Z",
-      "type": "cron",
-      "name": "Családi Események Emlékeztető",
-      "status": "ok"
-    },
-    {
-      "timestamp": "2026-03-30T06:00:00Z",
-      "type": "cron",
-      "name": "Recipe Collector Daily Multilingual Fetch",
-      "status": "error"
     }
   ],
   "systemHealth": {
@@ -234,8 +223,8 @@
   "stats": {
     "totalCrons": 38,
     "activeCrons": 38,
-    "errorCrons": 3,
+    "errorCrons": 2,
     "totalSessions": 188,
-    "recentSessions": 50
+    "recentSessions": 5
   }
 }
