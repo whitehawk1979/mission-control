@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-30T21:30:00.000Z",
+  "lastUpdated": "2026-03-30T22:00:00.000Z",
   "actionRequired": [
     {
       "level": "error",
@@ -9,7 +9,7 @@
       "action": "Fix Telegram delivery target configuration"
     },
     {
-      "level": "error", 
+      "level": "error",
       "source": "cron",
       "job": "Weekly Review",
       "message": "WhatsApp outbound not configured",
@@ -21,9 +21,9 @@
       "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
       "name": "Cron: Mission Control Dashboard Auto-Update",
       "status": "running",
-      "startedAt": "2026-03-30T21:30:01.381Z",
+      "startedAt": "2026-03-30T22:00:00.013Z",
       "model": "glm-5:cloud",
-      "tokens": 44624
+      "tokens": 44995
     }
   ],
   "crons": [
@@ -33,6 +33,7 @@
       "enabled": true,
       "schedule": "*/30 * * * *",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T21:30:00.024Z",
       "nextRun": "2026-03-30T22:30:00.000Z"
     },
     {
@@ -50,6 +51,7 @@
       "enabled": true,
       "schedule": "0 6 * * * (Europe/Bucharest)",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T04:00:00.000Z",
       "nextRun": "2026-03-31T04:00:00.000Z"
     },
     {
@@ -58,6 +60,7 @@
       "enabled": true,
       "schedule": "0 6 * * * (Europe/Bucharest)",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T04:00:00.000Z",
       "nextRun": "2026-03-31T04:00:00.000Z"
     },
     {
@@ -66,6 +69,7 @@
       "enabled": true,
       "schedule": "0 3 * * *",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T03:00:00.000Z",
       "nextRun": "2026-03-31T03:00:00.000Z"
     },
     {
@@ -74,6 +78,7 @@
       "enabled": true,
       "schedule": "30 6 * * 1-5 (Europe/Bucharest)",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T04:29:51.048Z",
       "nextRun": "2026-03-31T04:30:00.000Z"
     },
     {
@@ -82,6 +87,7 @@
       "enabled": true,
       "schedule": "30 7 * * 1-5 (Europe/Bucharest)",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T05:30:00.000Z",
       "nextRun": "2026-03-31T05:30:00.000Z"
     },
     {
@@ -90,6 +96,7 @@
       "enabled": true,
       "schedule": "0 6,18 * * *",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T18:00:00.000Z",
       "nextRun": "2026-03-31T06:00:00.000Z"
     },
     {
@@ -98,6 +105,7 @@
       "enabled": true,
       "schedule": "0 6,18 * * *",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T18:00:00.000Z",
       "nextRun": "2026-03-31T06:00:00.000Z"
     },
     {
@@ -106,6 +114,7 @@
       "enabled": true,
       "schedule": "0 9 * * *",
       "lastStatus": "ok",
+      "lastRun": "2026-03-30T09:00:00.000Z",
       "nextRun": "2026-03-31T09:00:00.000Z"
     },
     {
@@ -122,6 +131,7 @@
       "enabled": true,
       "schedule": "0 20 * * 0 (Europe/Bucharest)",
       "lastStatus": "ok",
+      "lastRun": "2026-03-29T17:00:00.000Z",
       "nextRun": "2026-04-05T17:00:00.000Z"
     },
     {
@@ -130,6 +140,7 @@
       "enabled": true,
       "schedule": "0 21 * * 0 (Europe/Bucharest)",
       "lastStatus": "ok",
+      "lastRun": "2026-03-29T18:00:00.000Z",
       "nextRun": "2026-04-05T18:00:00.000Z"
     },
     {
@@ -138,23 +149,31 @@
       "enabled": true,
       "schedule": "0 8 27 3 * (Europe/Bucharest)",
       "lastStatus": "ok",
+      "lastRun": "2026-03-27T06:00:00.000Z",
       "nextRun": "2027-03-27T06:00:00.000Z"
     }
   ],
   "recentActivity": [
     {
-      "timestamp": "2026-03-30T21:30:00.000Z",
+      "timestamp": "2026-03-30T22:00:00.000Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running",
       "details": "Scheduled execution started"
     },
     {
-      "timestamp": "2026-03-30T21:25:00.000Z",
+      "timestamp": "2026-03-30T21:30:00.000Z",
+      "type": "cron",
+      "name": "Mission Control Dashboard Auto-Update",
+      "status": "ok",
+      "details": "Last run successful (66.9s)"
+    },
+    {
+      "timestamp": "2026-03-30T21:27:00.000Z",
       "type": "session",
-      "name": "heartbeat",
-      "status": "done",
-      "details": "Runtime: 34s"
+      "name": "telegram:direct:7796035659",
+      "status": "failed",
+      "details": "Runtime: 14.7s"
     },
     {
       "timestamp": "2026-03-30T21:16:00.000Z",
@@ -164,18 +183,11 @@
       "details": "Failed: Telegram delivery missing chatId"
     },
     {
-      "timestamp": "2026-03-30T18:45:00.000Z",
+      "timestamp": "2026-03-30T20:54:00.000Z",
       "type": "session",
-      "name": "telegram:direct:7796035659",
+      "name": "heartbeat",
       "status": "done",
-      "details": "Runtime: 152s, 85 subagents"
-    },
-    {
-      "timestamp": "2026-03-30T18:30:00.000Z",
-      "type": "cron",
-      "name": "Dashboard Update",
-      "status": "ok",
-      "details": "Last run successful"
+      "details": "Runtime: 16.5s"
     }
   ],
   "summary": {
@@ -184,6 +196,6 @@
     "errorCrons": 2,
     "okCrons": 36,
     "activeSessions": 1,
-    "totalSessionsToday": 20
+    "totalSessionsToday": 3
   }
 }
