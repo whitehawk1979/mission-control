@@ -1,12 +1,12 @@
 {
-  "lastUpdated": "2026-03-30T10:16:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 30. 12:16:00 (UTC+2)",
+  "lastUpdated": "2026-03-30T10:30:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 30. 12:30:00 (UTC+2)",
   "systemHealth": {
     "status": "critical",
     "issues": 2,
     "details": [
-      "Activity Timeline Sync: 10 consecutive errors (timeout)",
-      "Weekly Review: 1 consecutive error"
+      "Activity Timeline Sync: 11 consecutive errors - Telegram delivery requires chatId",
+      "Weekly Review: 1 consecutive error - WhatsApp outbound not configured"
     ]
   },
   "actionRequired": [
@@ -15,9 +15,9 @@
       "source": "cron",
       "jobId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
       "name": "Activity Timeline Sync",
-      "issue": "10 consecutive timeout errors",
-      "lastError": "timeout",
-      "recommendation": "Increase timeout or investigate slow execution - script cannot reach Gateway API"
+      "issue": "11 consecutive errors",
+      "lastError": "Delivering to Telegram requires target <chatId>",
+      "recommendation": "Add chatId to delivery config or set delivery.mode to 'none'"
     },
     {
       "level": "warning",
@@ -29,33 +29,13 @@
       "recommendation": "Fix WhatsApp outbound configuration"
     }
   ],
-  "activeNow": [
-    {
-      "sessionKey": "agent:morzsa:cron:434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-      "displayName": "Activity Timeline Sync",
-      "status": "running",
-      "model": "glm-5:cloud",
-      "startedAt": "2026-03-30T10:15:44.550Z",
-      "tokens": 32760
-    }
-  ],
+  "activeNow": [],
   "brain": {
-    "status": "connected",
-    "uptimeMinutes": 12,
-    "memoryMB": 9,
-    "tools": [
-      {"name": "health", "description": "Health check endpoint"},
-      {"name": "status", "description": "System status"},
-      {"name": "tools", "description": "List available tools"},
-      {"name": "memory_recall", "description": "Recall relevant memories from PostgreSQL"},
-      {"name": "context_get", "description": "Get current agent context"},
-      {"name": "context_set", "description": "Set agent context for reasoning"},
-      {"name": "decision_log", "description": "Log a decision for future reasoning"},
-      {"name": "decision_recall", "description": "Recall similar past decisions"},
-      {"name": "kpi_analyze", "description": "Analyze KPIs and trends"},
-      {"name": "agent_status", "description": "Get status of all agents"}
-    ],
-    "lastActivity": "2026-03-30T10:15:54.763Z"
+    "status": "unknown",
+    "uptimeMinutes": null,
+    "memoryMB": null,
+    "tools": [],
+    "lastActivity": null
   },
   "crons": {
     "total": 38,
@@ -70,11 +50,11 @@
       {
         "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
         "name": "Activity Timeline Sync",
-        "consecutiveErrors": 10,
-        "lastError": "timeout",
+        "consecutiveErrors": 11,
+        "lastError": "Delivering to Telegram requires target <chatId>",
         "lastRunStatus": "error",
         "schedule": "*/5 * * * *",
-        "currentlyRunning": true
+        "currentlyRunning": false
       },
       {
         "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
@@ -95,16 +75,16 @@
     ]
   },
   "recentActivity": [
-    {"time": "2026-03-30T10:15:44.550Z", "type": "session_active", "name": "Activity Timeline Sync", "status": "running"},
+    {"time": "2026-03-30T10:30:00.000Z", "type": "dashboard_update", "name": "Mission Control Dashboard Auto-Update", "status": "running"},
     {"time": "2026-03-30T10:00:00.013Z", "type": "cron_completed", "name": "Mission Control Dashboard Auto-Update", "status": "ok"},
     {"time": "2026-03-30T09:48:11.789Z", "type": "cron_completed", "name": "Dashboard Update", "status": "ok"},
     {"time": "2026-03-30T09:00:00.015Z", "type": "cron_completed", "name": "Session PostgreSQL Sync", "status": "ok"},
     {"time": "2026-03-30T07:00:00.014Z", "type": "cron_completed", "name": "Családi Események Emlékeztető", "status": "ok"}
   ],
   "stats": {
-    "totalSessions": 20,
-    "activeSessions": 1,
-    "completedSessions": 17,
+    "totalSessions": 0,
+    "activeSessions": 0,
+    "completedSessions": 0,
     "totalCrons": 38,
     "healthyCrons": 33,
     "errorCrons": 2,
