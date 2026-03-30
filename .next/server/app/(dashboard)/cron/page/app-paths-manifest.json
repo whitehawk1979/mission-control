@@ -1,0 +1,3 @@
+{
+  "/(dashboard)/cron/page": "app/(dashboard)/cron/page.js"
+}

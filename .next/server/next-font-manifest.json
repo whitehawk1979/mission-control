@@ -1,0 +1,127 @@
+{
+  "app": {
+    "[project]/src/app/(dashboard)/about/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/actions/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/activity/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/agents/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/analytics/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/calendar/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/costs/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/cron/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/files/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/git/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/logs/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/memory/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/reports/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/search/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/sessions/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/settings/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/skills/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/system/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/terminal/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/(dashboard)/workflows/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/_not-found/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/login/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ],
+    "[project]/src/app/office/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/6bd983bd58a87a3d-s.p.cf80dd39.woff2",
+      "static/media/70bc3e132a0a741e-s.p.15008bfb.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

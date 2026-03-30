@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/app/login/layout.tsx"],"sourcesContent":["export default function LoginLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":[],"mappings":"uDAAe,SAAS,EAAY,UAClC,CAAQ,CAGT,EACC,MAAO,CAAA,EAAA,EAAA,GAAA,EAAA,EAAA,QAAA,CAAA,UAAG,GACZ"}

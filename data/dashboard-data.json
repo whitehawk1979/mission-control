@@ -1,0 +1,172 @@
+{
+  "lastUpdated": "2026-03-30T08:03:15.000Z",
+  "lastUpdatedHuman": "2026. 03. 30. 8:03:15",
+  "systemHealth": {
+    "status": "degraded",
+    "issues": 2,
+    "details": [
+      "Mission Control Dashboard Auto-Update: 5 consecutive timeout errors",
+      "Activity Timeline Sync: 8 consecutive timeout errors"
+    ]
+  },
+  "actionRequired": [
+    {
+      "level": "critical",
+      "source": "cron",
+      "jobId": "2451cb36-cee9-48f4-b032-1086e387b078",
+      "name": "Mission Control Dashboard Auto-Update",
+      "issue": "5 consecutive timeout errors",
+      "lastError": "timeout",
+      "recommendation": "Increase timeout from 180s or investigate slow execution"
+    },
+    {
+      "level": "critical",
+      "source": "cron",
+      "jobId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+      "name": "Activity Timeline Sync",
+      "issue": "8 consecutive timeout errors",
+      "lastError": "timeout",
+      "recommendation": "Increase timeout from 120s or check script performance"
+    },
+    {
+      "level": "warning",
+      "source": "cron",
+      "jobId": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+      "name": "Weekly Review (Analyzer)",
+      "issue": "WhatsApp outbound not configured",
+      "lastError": "Outbound not configured for channel: whatsapp",
+      "recommendation": "Configure WhatsApp delivery or switch to Telegram"
+    }
+  ],
+  "activeNow": [
+    {
+      "sessionKey": "agent:morzsa:whatsapp:direct:+40770194845",
+      "displayName": "WhatsApp session (+40770194845)",
+      "status": "running",
+      "model": "glm-5:cloud",
+      "startedAt": "2026-03-30T07:49:36.015Z",
+      "tokens": 82861,
+      "subagents": 12
+    },
+    {
+      "sessionKey": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
+      "displayName": "Cron: Mission Control Dashboard Auto-Update",
+      "status": "running",
+      "model": "glm-5:cloud",
+      "startedAt": "2026-03-30T08:03:00.710Z",
+      "tokens": 0
+    }
+  ],
+  "crons": {
+    "total": 44,
+    "enabled": 38,
+    "disabled": 6,
+    "summary": {
+      "ok": 31,
+      "error": 5,
+      "pending": 8
+    },
+    "withErrors": [
+      {
+        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
+        "name": "Mission Control Dashboard Auto-Update",
+        "consecutiveErrors": 5,
+        "lastError": "timeout",
+        "lastRunStatus": "error",
+        "schedule": "*/30 * * * *"
+      },
+      {
+        "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+        "name": "Activity Timeline Sync",
+        "consecutiveErrors": 8,
+        "lastError": "timeout",
+        "lastRunStatus": "error",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+        "name": "Weekly Review (Analyzer)",
+        "consecutiveErrors": 1,
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "lastRunStatus": "error",
+        "schedule": "0 18 * * 5"
+      }
+    ],
+    "recentSuccessful": [
+      {
+        "name": "Dashboard Update",
+        "lastRun": "2026-03-30T06:28:11.789Z",
+        "durationMs": 176571,
+        "status": "ok"
+      },
+      {
+        "name": "Session PostgreSQL Sync",
+        "lastRun": "2026-03-30T06:00:00.015Z",
+        "durationMs": 91774,
+        "status": "ok"
+      },
+      {
+        "name": "Családi Események Emlékeztető",
+        "lastRun": "2026-03-30T05:00:00.040Z",
+        "durationMs": 31408,
+        "status": "ok"
+      },
+      {
+        "name": "Start of Day - Postgres Recall",
+        "lastRun": "2026-03-30T04:58:11.048Z",
+        "durationMs": 55115,
+        "status": "ok"
+      },
+      {
+        "name": "Daily Briefing (Morzsa)",
+        "lastRun": "2026-03-30T05:15:02.121Z",
+        "durationMs": 122249,
+        "status": "ok"
+      }
+    ]
+  },
+  "recentActivity": [
+    {
+      "time": "2026-03-30T08:03:00Z",
+      "type": "cron_started",
+      "name": "Mission Control Dashboard Auto-Update",
+      "status": "running"
+    },
+    {
+      "time": "2026-03-30T07:00:00Z",
+      "type": "session_active",
+      "name": "WhatsApp session (+40770194845)",
+      "status": "running",
+      "subagents": 9
+    },
+    {
+      "time": "2026-03-30T06:42:37Z",
+      "type": "cron_started",
+      "name": "Activity Timeline Sync",
+      "status": "running"
+    },
+    {
+      "time": "2026-03-30T06:28:11Z",
+      "type": "cron_completed",
+      "name": "Dashboard Update",
+      "status": "ok",
+      "duration": "2m 56s"
+    },
+    {
+      "time": "2026-03-30T06:00:00Z",
+      "type": "cron_completed",
+      "name": "Session PostgreSQL Sync",
+      "status": "ok",
+      "duration": "1m 31s"
+    }
+  ],
+  "stats": {
+    "totalSessions": 20,
+    "activeSessions": 2,
+    "completedSessions": 18,
+    "totalCrons": 44,
+    "healthyCrons": 31,
+    "errorCrons": 5,
+    "pendingReminders": 8
+  }
+}

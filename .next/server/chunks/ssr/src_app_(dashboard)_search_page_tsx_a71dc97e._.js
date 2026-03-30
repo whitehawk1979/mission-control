@@ -1,0 +1,3 @@
+module.exports=[57613,a=>{"use strict";var b=a.i(87924),c=a.i(70152);function d(){return(0,b.jsxs)("div",{className:"p-4 md:p-8",children:[(0,b.jsxs)("div",{className:"mb-6 md:mb-8",children:[(0,b.jsx)("h1",{className:"text-2xl md:text-3xl font-bold mb-1 md:mb-2",style:{color:"var(--text-primary)",fontFamily:"var(--font-heading)"},children:"Global Search"}),(0,b.jsx)("p",{className:"text-sm md:text-base",style:{color:"var(--text-secondary)"},children:"Search across activities, tasks, and indexed documents"})]}),(0,b.jsx)(c.GlobalSearch,{fullPage:!0})]})}a.s(["default",()=>d])}];
+
+//# sourceMappingURL=src_app_%28dashboard%29_search_page_tsx_a71dc97e._.js.map
