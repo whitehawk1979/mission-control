@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-03-31T17:00:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 31. 17:00:00 UTC",
+  "lastUpdated": "2026-03-31T17:30:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 31. 17:30:00 UTC",
   "systemHealth": {
     "status": "degraded",
     "issues": 2,
@@ -13,18 +13,12 @@
     {
       "type": "error",
       "source": "Activity Timeline Sync",
-      "message": "41 consecutive errors - Telegram channel requires chatId",
+      "message": "41 consecutive errors - Telegram requires target <chatId>",
       "cronId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b"
     },
     {
-      "type": "warning",
-      "source": "Mission Control Dashboard Auto-Update",
-      "message": "Last run timed out (180s)",
-      "cronId": "2451cb36-cee9-48f4-b032-1086e387b078"
-    },
-    {
       "type": "error",
-      "source": "Start of Day - Postgres Recall + Priorities",
+      "source": "Start of Day - Postgres Recall",
       "message": "Outbound not configured for WhatsApp channel",
       "cronId": "0961291c-061e-4e99-92c0-d5648f942cc7"
     },
@@ -60,18 +54,11 @@
     "enabled": 35,
     "disabled": 10,
     "summary": {
-      "ok": 11,
-      "error": 9,
-      "pending": 25
+      "ok": 12,
+      "error": 6,
+      "pending": 27
     },
     "withErrors": [
-      {
-        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-        "name": "Mission Control Dashboard Auto-Update",
-        "lastStatus": "error",
-        "lastError": "timeout",
-        "consecutiveErrors": 1
-      },
       {
         "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
         "name": "Activity Timeline Sync",
@@ -110,28 +97,11 @@
     ],
     "recentSuccessful": [
       {
-        "id": "acd86258-87d7-4a08-aa09-26387c156dda",
-        "name": "Dashboard Update",
-        "lastRunAt": "2026-03-31T06:00:00.000Z",
-        "lastDurationMs": 77818
-      },
-      {
-        "id": "fba27730-005a-48fe-b75d-02c48551dd69",
-        "name": "Session PostgreSQL Sync",
-        "lastRunAt": "2026-03-31T06:00:00.000Z",
-        "lastDurationMs": 60427
-      },
-      {
-        "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
-        "name": "PostgreSQL Memory Backup",
-        "lastRunAt": "2026-03-31T03:00:00.000Z",
-        "lastDurationMs": 29176
-      },
-      {
-        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
-        "name": "Recipe Collector Daily Fetch",
-        "lastRunAt": "2026-03-31T06:00:00.000Z",
-        "lastDurationMs": 230378
+        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
+        "name": "Mission Control Dashboard Auto-Update",
+        "lastRunAt": "2026-03-31T17:30:00.000Z",
+        "lastDurationMs": 106509,
+        "status": "running"
       },
       {
         "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
@@ -139,36 +109,54 @@
         "lastRunAt": "2026-03-31T09:00:00.000Z",
         "lastDurationMs": 51940,
         "deliveryStatus": "delivered"
+      },
+      {
+        "id": "acd86258-87d7-4a08-aa09-26387c156dda",
+        "name": "Dashboard Update",
+        "lastRunAt": "2026-03-31T17:00:00.000Z",
+        "lastDurationMs": 77818
+      },
+      {
+        "id": "fba27730-005a-48fe-b75d-02c48551dd69",
+        "name": "Session PostgreSQL Sync",
+        "lastRunAt": "2026-03-31T17:00:00.000Z",
+        "lastDurationMs": 60427
+      },
+      {
+        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
+        "name": "Recipe Collector Daily Fetch",
+        "lastRunAt": "2026-03-31T06:00:00.000Z",
+        "lastDurationMs": 230378
       }
     ],
     "nextRuns": [
       {
-        "name": "Mission Control Dashboard Auto-Update",
-        "nextRunAt": "2026-03-31T17:00:00.000Z",
-        "in": "now"
-      },
-      {
         "name": "Activity Timeline Sync",
-        "nextRunAt": "2026-03-31T17:06:02.337Z",
+        "nextRunAt": "2026-03-31T17:36:02.337Z",
         "in": "~6min"
       },
       {
         "name": "Dashboard Update",
         "nextRunAt": "2026-03-31T18:00:00.000Z",
-        "in": "~1h"
+        "in": "~30min"
+      },
+      {
+        "name": "Session PostgreSQL Sync",
+        "nextRunAt": "2026-03-31T18:00:00.000Z",
+        "in": "~30min"
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-03-31T16:30:00.000Z",
-      "type": "cron_success",
-      "message": "Dashboard Update completed successfully"
+      "time": "2026-03-31T17:30:00.000Z",
+      "type": "cron_running",
+      "message": "Mission Control Dashboard Auto-Update started"
     },
     {
-      "time": "2026-03-31T16:00:00.000Z",
-      "type": "cron_error",
-      "message": "Mission Control Dashboard Auto-Update timed out"
+      "time": "2026-03-31T17:00:00.000Z",
+      "type": "cron_success",
+      "message": "Dashboard Update + Session PostgreSQL Sync completed"
     },
     {
       "time": "2026-03-31T09:00:00.000Z",
@@ -192,12 +180,15 @@
     "completedSessions": 0,
     "totalCrons": 45,
     "enabledCrons": 35,
-    "healthyCrons": 11,
-    "errorCrons": 9,
-    "pendingReminders": 25,
+    "healthyCrons": 12,
+    "errorCrons": 6,
+    "pendingReminders": 27,
     "consecutiveErrorJobs": [
       { "name": "Activity Timeline Sync", "errors": 41 },
-      { "name": "BTC Finder Agent (6h)", "errors": 7 }
+      { "name": "Start of Day - Postgres Recall", "errors": 1 },
+      { "name": "Daily Briefing (Morzsa)", "errors": 1 },
+      { "name": "Weekly Review (Analyzer)", "errors": 1 },
+      { "name": "Recipe Collector Daily Multilingual", "errors": 1 }
     ]
   }
 }
