@@ -1,146 +1,159 @@
 {
-  "lastUpdated": "2026-03-31T07:30:00.000Z",
+  "lastUpdated": "2026-03-31T08:00:00.000Z",
   "actionRequired": [
     {
-      "level": "critical",
+      "type": "error",
       "source": "Activity Timeline Sync",
-      "cronId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-      "message": "32 consecutive errors - Telegram delivery requires chatId",
-      "suggestion": "Update cron delivery.to with valid Telegram chatId"
+      "message": "32 consecutive errors - Telegram chatId missing",
+      "severity": "high"
     },
     {
-      "level": "warning",
-      "source": "Start of Day / Daily Briefing / Weekly Review",
-      "message": "WhatsApp outbound not configured for systemEvent payloads",
-      "suggestion": "These crons use main session but WhatsApp not configured for systemEvent"
-    },
-    {
-      "level": "warning",
+      "type": "error",
       "source": "Recipe Collector Multilingual",
-      "cronId": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
       "message": "Telegram outbound not configured",
-      "suggestion": "Configure Telegram delivery or change delivery mode to none"
+      "severity": "medium"
+    },
+    {
+      "type": "error",
+      "source": "Start of Day / Daily Briefing",
+      "message": "WhatsApp channel not configured",
+      "severity": "medium"
+    },
+    {
+      "type": "warning",
+      "source": "Mission Control Dashboard Auto-Update",
+      "message": "Last run timeout (184s), currently running",
+      "severity": "low"
     }
   ],
   "activeNow": [
     {
-      "sessionKey": "agent:pajti:cron:acd86258-87d7-4a08-aa09-26387c156dda",
-      "label": "Dashboard Update",
+      "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
+      "label": "Mission Control Dashboard Auto-Update",
       "status": "running",
-      "startedAt": "2026-03-26T08:03:00.502Z",
-      "model": "glm-5:cloud"
+      "startedAt": "2026-03-31T08:00:02.269Z"
     },
     {
-      "sessionKey": "agent:pajti:cron:fba27730-005a-48fe-b75d-02c48551dd69",
-      "label": "Session PostgreSQL Sync",
+      "key": "agent:morzsa:telegram:direct:7796035659",
+      "label": "Telegram: Morzsa Direct",
       "status": "running",
-      "startedAt": "2026-03-26T08:00:02.558Z",
-      "model": "glm-5:cloud"
+      "childSessions": 85
+    },
+    {
+      "key": "agent:pajti:cron:acd86258-87d7-4a08-aa09-26387c156dda",
+      "label": "Dashboard Update",
+      "status": "running"
+    },
+    {
+      "key": "agent:pajti:cron:fba27730-005a-48fe-b75d-02c48551dd69",
+      "label": "Session PostgreSQL Sync",
+      "status": "running"
     }
   ],
   "crons": {
-    "total": 39,
+    "total": 45,
     "enabled": 39,
+    "disabled": 6,
     "status": {
-      "ok": 28,
+      "ok": 33,
       "error": 6,
-      "pending": 5
+      "running": 2,
+      "pending": 4
+    },
+    "byCategory": {
+      "system": 8,
+      "reminder": 24,
+      "collector": 4,
+      "maintenance": 3,
+      "dashboard": 3,
+      "other": 3
     },
     "errors": [
       {
         "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
         "name": "Activity Timeline Sync",
         "consecutiveErrors": 32,
-        "lastError": "Delivering to Telegram requires target <chatId>",
-        "schedule": "*/5 * * * *"
+        "lastError": "Delivering to Telegram requires target <chatId>"
+      },
+      {
+        "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
+        "name": "Recipe Collector Daily Multilingual Fetch",
+        "consecutiveErrors": 1,
+        "lastError": "Outbound not configured for channel: telegram"
       },
       {
         "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
-        "name": "Start of Day - Postgres Recall",
+        "name": "Start of Day - Postgres Recall + Priorities",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp",
-        "schedule": "30 6 * * 1-5"
+        "lastError": "Outbound not configured for channel: whatsapp"
       },
       {
         "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
-        "name": "Daily Briefing (Morzsa)",
+        "name": "Munkaoptimalizálás - Daily Briefing (Morzsa)",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp",
-        "schedule": "30 7 * * 1-5"
+        "lastError": "Outbound not configured for channel: whatsapp"
       },
       {
         "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
         "name": "Weekly Review (Analyzer)",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp",
-        "schedule": "0 18 * * 5"
+        "lastError": "Outbound not configured for channel: whatsapp"
       },
       {
-        "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
-        "name": "Recipe Collector Multilingual Fetch",
+        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
+        "name": "Mission Control Dashboard Auto-Update",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: telegram",
-        "schedule": "0 6 * * *"
+        "lastError": "timeout"
       }
     ],
     "nextRuns": [
       {
-        "name": "Mission Control Dashboard Auto-Update",
-        "nextRun": "2026-03-31T08:30:00.000Z",
-        "schedule": "*/30 * * * *"
-      },
-      {
         "name": "Activity Timeline Sync",
-        "nextRun": "2026-03-31T08:30:00.000Z",
-        "schedule": "*/5 * * * *"
+        "nextRun": "2026-03-31T08:30:00.000Z"
       },
       {
         "name": "Családi Események Emlékeztető",
-        "nextRun": "2026-03-31T09:00:00.000Z",
-        "schedule": "0 9 * * *"
+        "nextRun": "2026-04-01T09:00:00.000Z"
+      },
+      {
+        "name": "Dashboard Update",
+        "nextRun": "2026-04-01T18:00:00.000Z"
+      },
+      {
+        "name": "Session PostgreSQL Sync",
+        "nextRun": "2026-04-01T18:00:00.000Z"
+      },
+      {
+        "name": "PostgreSQL Memory Backup",
+        "nextRun": "2026-04-01T03:00:00.000Z"
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-03-31T07:30:38.252Z",
-      "session": "Cron: Mission Control Dashboard Auto-Update",
-      "status": "failed",
-      "model": "glm-5:cloud",
-      "tokens": 47476
+      "time": "2026-03-31T08:00:02Z",
+      "event": "Mission Control Dashboard Auto-Update started",
+      "status": "running"
     },
     {
-      "time": "2026-03-31T07:29:36.914Z",
-      "session": "Cron: Activity Timeline Sync",
-      "status": "failed",
-      "model": "glm-5:cloud",
-      "tokens": 20815
+      "time": "2026-03-31T07:39:26Z",
+      "event": "WhatsApp session ended",
+      "status": "done"
     },
     {
-      "time": "2026-03-31T07:16:23.782Z",
-      "session": "Telegram Direct",
-      "status": "done",
-      "model": "glm-5:cloud",
-      "tokens": 103815
+      "time": "2026-03-31T06:01:00Z",
+      "event": "Dashboard Update completed",
+      "status": "ok"
     },
     {
-      "time": "2026-03-31T07:05:33.093Z",
-      "session": "Heartbeat",
-      "status": "done",
-      "model": "glm-5:cloud",
-      "tokens": 28650
+      "time": "2026-03-31T06:00:00Z",
+      "event": "Session PostgreSQL Sync ran",
+      "status": "ok"
     },
     {
-      "time": "2026-03-30T22:17:41.653Z",
-      "session": "WhatsApp Direct",
-      "status": "done",
-      "model": "glm-5:cloud",
-      "tokens": 69520
+      "time": "2026-03-31T05:30:00Z",
+      "event": "Activity Timeline Sync failed (Telegram error)",
+      "status": "error"
     }
-  ],
-  "systemHealth": {
-    "postgres": "online",
-    "gateway": "online",
-    "tailscale": "online"
-  }
+  ]
 }
