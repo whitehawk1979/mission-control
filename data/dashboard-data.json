@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-31T11:00:00Z",
+  "lastUpdated": "2026-03-31T11:30:00Z",
   "actionRequired": [
     {
       "type": "error",
@@ -8,6 +8,14 @@
       "name": "Activity Timeline Sync",
       "message": "35 consecutive errors - Telegram delivery requires chatId",
       "severity": "high"
+    },
+    {
+      "type": "error",
+      "source": "cron",
+      "jobId": "2451cb36-cee9-48f4-b032-1086e387b078",
+      "name": "Mission Control Dashboard Auto-Update",
+      "message": "Last run timeout (181s), running now",
+      "severity": "medium"
     },
     {
       "type": "error",
@@ -27,11 +35,18 @@
     },
     {
       "type": "error",
-      "source": "session",
-      "sessionId": "5f32e4f7-db10-46a9-9a1f-ea37597e66d8",
-      "name": "Pajti-Memory-API-Fix",
-      "message": "Session timeout after 621s",
+      "source": "cron",
+      "jobId": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
+      "name": "Recipe Collector Daily Multilingual Fetch",
+      "message": "Telegram outbound not configured",
       "severity": "medium"
+    },
+    {
+      "type": "warning",
+      "source": "system",
+      "name": "Gateway Timeout",
+      "message": "sessions_list timeout (10s) - gateway slow",
+      "severity": "low"
     }
   ],
   "activeNow": [
@@ -39,13 +54,8 @@
       "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
       "label": "Cron: Mission Control Dashboard Auto-Update",
       "status": "running",
-      "model": "glm-5:cloud"
-    },
-    {
-      "key": "agent:morzsa:telegram:direct:7796035659",
-      "label": "Telegram Direct",
-      "status": "running",
-      "model": "glm-5:cloud"
+      "model": "glm-5:cloud",
+      "started": "2026-03-31T11:30:00Z"
     }
   ],
   "crons": [
@@ -54,10 +64,12 @@
       "name": "Mission Control Dashboard Auto-Update",
       "schedule": "*/30 * * * *",
       "enabled": true,
-      "lastStatus": "ok",
+      "lastStatus": "error",
       "lastRun": "2026-03-31T10:30:00Z",
-      "nextRun": "2026-03-31T11:00:00Z",
-      "consecutiveErrors": 0
+      "nextRun": "2026-03-31T11:30:00Z",
+      "consecutiveErrors": 1,
+      "lastError": "timeout",
+      "lastDurationMs": 181233
     },
     {
       "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
@@ -78,7 +90,8 @@
       "lastStatus": "ok",
       "lastRun": "2026-03-31T06:00:00Z",
       "nextRun": "2026-03-31T18:00:00Z",
-      "consecutiveErrors": 0
+      "consecutiveErrors": 0,
+      "lastDurationMs": 77818
     },
     {
       "id": "fba27730-005a-48fe-b75d-02c48551dd69",
@@ -88,7 +101,8 @@
       "lastStatus": "ok",
       "lastRun": "2026-03-31T06:00:00Z",
       "nextRun": "2026-03-31T18:00:00Z",
-      "consecutiveErrors": 0
+      "consecutiveErrors": 0,
+      "lastDurationMs": 60427
     },
     {
       "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
@@ -98,7 +112,8 @@
       "lastStatus": "ok",
       "lastRun": "2026-03-31T03:00:00Z",
       "nextRun": "2026-04-01T03:00:00Z",
-      "consecutiveErrors": 0
+      "consecutiveErrors": 0,
+      "lastDurationMs": 29176
     },
     {
       "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
@@ -109,7 +124,8 @@
       "lastRun": "2026-03-31T05:30:00Z",
       "nextRun": "2026-04-01T04:30:00Z",
       "consecutiveErrors": 1,
-      "lastError": "Outbound not configured for channel: whatsapp"
+      "lastError": "Outbound not configured for channel: whatsapp",
+      "lastDurationMs": 52125
     },
     {
       "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
@@ -120,7 +136,8 @@
       "lastRun": "2026-03-31T05:30:00Z",
       "nextRun": "2026-04-01T05:30:00Z",
       "consecutiveErrors": 1,
-      "lastError": "Outbound not configured for channel: whatsapp"
+      "lastError": "Outbound not configured for channel: whatsapp",
+      "lastDurationMs": 57768
     },
     {
       "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
@@ -130,7 +147,8 @@
       "lastStatus": "ok",
       "lastRun": "2026-03-31T09:00:00Z",
       "nextRun": "2026-04-01T09:00:00Z",
-      "consecutiveErrors": 0
+      "consecutiveErrors": 0,
+      "lastDurationMs": 51940
     },
     {
       "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
@@ -141,7 +159,8 @@
       "lastRun": "2026-03-31T03:35:32Z",
       "nextRun": "2026-04-01T04:00:00Z",
       "consecutiveErrors": 1,
-      "lastError": "Outbound not configured for channel: telegram"
+      "lastError": "Outbound not configured for channel: telegram",
+      "lastDurationMs": 274396
     },
     {
       "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
@@ -151,27 +170,92 @@
       "lastStatus": "ok",
       "lastRun": "2026-03-31T03:33:49Z",
       "nextRun": "2026-04-01T04:00:00Z",
-      "consecutiveErrors": 0
+      "consecutiveErrors": 0,
+      "lastDurationMs": 230378
+    },
+    {
+      "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
+      "name": "recipe-collector-daily",
+      "schedule": "0 6 * * *",
+      "enabled": true,
+      "lastStatus": "ok",
+      "lastRun": "2026-03-31T03:33:49Z",
+      "nextRun": "2026-04-01T04:00:00Z",
+      "consecutiveErrors": 0,
+      "lastDurationMs": 272976
+    },
+    {
+      "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+      "name": "Weekly Review (Analyzer)",
+      "schedule": "0 18 * * 5",
+      "enabled": true,
+      "lastStatus": "error",
+      "lastRun": "2026-03-24T18:00:00Z",
+      "nextRun": "2026-04-04T15:00:00Z",
+      "consecutiveErrors": 1,
+      "lastError": "Outbound not configured for channel: whatsapp"
+    },
+    {
+      "id": "2d071f9b-0f3b-4d74-9a7d-43cc9e6da7e2",
+      "name": "Full System Optimization (Improver)",
+      "schedule": "0 20 * * 0",
+      "enabled": true,
+      "lastStatus": "ok",
+      "lastRun": "2026-03-29T18:00:00Z",
+      "nextRun": "2026-04-05T17:00:00Z",
+      "consecutiveErrors": 0,
+      "lastDurationMs": 202594
+    },
+    {
+      "id": "a03b6584-87f8-45f6-a496-3879546d9f03",
+      "name": "Memória Cleanup + Index Rebuild",
+      "schedule": "0 21 * * 0",
+      "enabled": true,
+      "lastStatus": "ok",
+      "lastRun": "2026-03-29T19:00:00Z",
+      "nextRun": "2026-04-05T18:00:00Z",
+      "consecutiveErrors": 0,
+      "lastDurationMs": 130161
+    }
+  ],
+  "upcomingEvents": [
+    {
+      "id": "9550018d-2b39-46c6-a6ab-5974699f6f85",
+      "name": "Zsolt ügyelet emlékeztető április 6",
+      "nextRun": "2026-04-05T20:00:00Z",
+      "type": "reminder"
+    },
+    {
+      "id": "21594749-069f-466b-beed-2b53b03b6837",
+      "name": "Reminder: Hajnalka birthday (30d)",
+      "nextRun": "2026-04-05T09:00:00Z",
+      "type": "reminder"
+    },
+    {
+      "id": "57a331fb-411a-4a7c-8dbf-1dcf48990828",
+      "name": "Anita születésnap emlékeztető",
+      "nextRun": "2026-04-12T07:00:00Z",
+      "type": "birthday"
     }
   ],
   "recentActivity": [
     {
+      "timestamp": "2026-03-31T11:30:00Z",
+      "type": "cron_start",
+      "name": "Mission Control Dashboard Auto-Update",
+      "message": "Dashboard update in progress"
+    },
+    {
       "timestamp": "2026-03-31T10:53:05Z",
       "type": "cron_error",
       "name": "Activity Timeline Sync",
-      "message": "Error: Outbound not configured for channel: telegram"
+      "message": "Error: Delivering to Telegram requires target <chatId>"
     },
     {
       "timestamp": "2026-03-31T10:30:00Z",
-      "type": "cron_start",
+      "type": "cron_timeout",
       "name": "Mission Control Dashboard Auto-Update",
-      "message": "Cron job started"
-    },
-    {
-      "timestamp": "2026-03-31T09:14:02Z",
-      "type": "session_timeout",
-      "name": "Pajti-Memory-API-Fix",
-      "message": "Session timed out after 621s"
+      "message": "Previous run timed out after 181s"
     },
     {
       "timestamp": "2026-03-31T09:00:00Z",
@@ -182,16 +266,19 @@
     {
       "timestamp": "2026-03-31T06:00:00Z",
       "type": "cron_success",
-      "name": "Dashboard Update",
-      "message": "Completed successfully"
+      "name": "Dashboard Update + Session PostgreSQL Sync",
+      "message": "Both completed successfully"
     }
   ],
   "stats": {
-    "totalCrons": 39,
-    "enabledCrons": 39,
+    "totalCrons": 45,
+    "enabledCrons": 45,
+    "disabledCrons": 0,
     "errorCrons": 4,
-    "totalSessions": 7,
-    "activeSessions": 2,
-    "failedSessions": 2
+    "okCrons": 38,
+    "pendingCrons": 3,
+    "totalRuns": 12,
+    "successRuns": 8,
+    "errorRuns": 4
   }
 }
