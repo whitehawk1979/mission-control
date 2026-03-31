@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-03-31T06:30:30.000Z",
-  "lastUpdatedHuman": "2026. 03. 31. 06:30:30 UTC",
+  "lastUpdated": "2026-03-31T07:00:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 31. 07:00:00 UTC",
   "systemHealth": {
     "status": "warning",
     "issues": 5,
@@ -60,17 +60,8 @@
       "label": "Cron: Mission Control Dashboard Auto-Update",
       "status": "running",
       "model": "glm-5:cloud",
-      "tokens": 72364,
-      "startedAt": "2026-03-31T06:30:02.208Z"
-    },
-    {
-      "sessionKey": "agent:morzsa:telegram:direct:7796035659",
-      "label": "Telegram: Morzsa Direct",
-      "status": "running",
-      "model": "glm-5:cloud",
-      "tokens": 59226,
-      "startedAt": "2026-03-31T06:28:40.461Z",
-      "childSessions": 88
+      "tokens": 46176,
+      "startedAt": "2026-03-31T07:00:01.481Z"
     },
     {
       "sessionKey": "agent:pajti:cron:acd86258-87d7-4a08-aa09-26387c156dda",
@@ -90,9 +81,9 @@
     }
   ],
   "crons": {
-    "total": 39,
+    "total": 45,
     "enabled": 39,
-    "disabled": 0,
+    "disabled": 6,
     "summary": {
       "ok": 22,
       "error": 5,
@@ -146,7 +137,7 @@
         "name": "Mission Control Dashboard Auto-Update",
         "lastStatus": "ok",
         "lastRunAt": "2026-03-31T06:30:00.036Z",
-        "lastDurationMs": 83342,
+        "lastDurationMs": 100488,
         "running": true
       },
       {
@@ -181,18 +172,27 @@
   },
   "recentActivity": [
     {
-      "timestamp": "2026-03-31T06:30:02.208Z",
+      "timestamp": "2026-03-31T07:00:01.481Z",
       "type": "cron",
       "agent": "morzsa",
       "action": "Mission Control Dashboard Auto-Update started",
       "status": "running"
     },
     {
+      "timestamp": "2026-03-31T06:30:00.036Z",
+      "type": "cron",
+      "agent": "morzsa",
+      "action": "Mission Control Dashboard Auto-Update completed",
+      "status": "ok",
+      "durationMs": 100488
+    },
+    {
       "timestamp": "2026-03-31T06:28:40.461Z",
       "type": "session",
       "agent": "morzsa",
       "action": "Telegram direct session active",
-      "status": "running"
+      "status": "done",
+      "durationMs": 24124
     },
     {
       "timestamp": "2026-03-31T06:01:00.441Z",
@@ -209,26 +209,20 @@
       "action": "Session PostgreSQL Sync completed",
       "status": "ok",
       "durationMs": 60427
-    },
-    {
-      "timestamp": "2026-03-30T21:08:59.966Z",
-      "type": "cron",
-      "agent": "morzsa",
-      "action": "Activity Timeline Sync failed",
-      "status": "error",
-      "error": "Delivering to Telegram requires target <chatId>"
     }
   ],
   "stats": {
-    "totalSessions": 20,
-    "activeSessions": 4,
-    "completedSessions": 12,
-    "failedSessions": 4,
-    "totalCrons": 39,
+    "totalSessions": 10,
+    "activeSessions": 3,
+    "completedSessions": 5,
+    "failedSessions": 2,
+    "totalCrons": 45,
+    "enabledCrons": 39,
+    "disabledCrons": 6,
     "healthyCrons": 22,
     "errorCrons": 5,
     "pendingReminders": 12,
-    "totalTokens": 678324,
+    "totalTokens": 224528,
     "estimatedCostUsd": 0
   }
 }
