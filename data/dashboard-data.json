@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-03-31T02:30:00.000Z",
-  "generatedAt": "2026-03-31T02:30:00.000Z",
+  "lastUpdated": "2026-03-31T03:13:00.000Z",
+  "generatedAt": "2026-03-31T03:13:00Z",
   "actionRequired": [
     {
       "type": "error",
@@ -20,9 +20,9 @@
   "activeNow": [
     {
       "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
-      "label": "Mission Control Dashboard Auto-Update",
+      "label": "Cron: Mission Control Dashboard Auto-Update",
       "status": "running",
-      "startedAt": "2026-03-31T02:30:01.336Z",
+      "startedAt": "2026-03-31T03:13:26.948Z",
       "model": "glm-5:cloud"
     }
   ],
@@ -32,49 +32,9 @@
       "name": "Mission Control Dashboard Auto-Update",
       "enabled": true,
       "schedule": "*/30 * * * *",
-      "status": "ok",
-      "lastRun": "2026-03-31T02:00:00.021Z",
-      "nextRun": "2026-03-31T02:30:00.000Z",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
-      "name": "Recipe Collector Daily Multilingual Fetch",
-      "enabled": true,
-      "schedule": "0 6 * * * (Europe/Bucharest)",
-      "status": "ok",
-      "lastRun": "2026-03-30T04:26:02.626Z",
-      "nextRun": "2026-03-31T05:00:00.000Z",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
-      "name": "Recipe Collector Daily Fetch",
-      "enabled": true,
-      "schedule": "0 6 * * * (Europe/Bucharest)",
-      "status": "ok",
-      "lastRun": "2026-03-30T04:03:39.863Z",
-      "nextRun": "2026-03-31T05:00:00.000Z",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
-      "name": "recipe-collector-daily",
-      "enabled": true,
-      "schedule": "0 6 * * * (Europe/Bucharest)",
-      "status": "ok",
-      "lastRun": "2026-03-30T04:05:55.667Z",
-      "nextRun": "2026-03-31T05:00:00.000Z",
-      "consecutiveErrors": 0
-    },
-    {
-      "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
-      "name": "PostgreSQL Memory Backup",
-      "enabled": true,
-      "schedule": "0 3 * * *",
-      "status": "ok",
-      "lastRun": "2026-03-30T03:00:00.010Z",
-      "nextRun": "2026-03-31T05:00:00.000Z",
+      "status": "running",
+      "lastRun": "2026-03-31T02:30:00.017Z",
+      "nextRun": "2026-03-31T03:30:00.000Z",
       "consecutiveErrors": 0
     },
     {
@@ -84,9 +44,49 @@
       "schedule": "*/5 * * * *",
       "status": "error",
       "lastRun": "2026-03-31T02:27:18.724Z",
-      "nextRun": "2026-03-31T02:35:00.000Z",
+      "nextRun": "2026-03-31T03:15:00.000Z",
       "consecutiveErrors": 27,
       "lastError": "Delivering to Telegram requires target <chatId>"
+    },
+    {
+      "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
+      "name": "Recipe Collector Daily Multilingual Fetch",
+      "enabled": true,
+      "schedule": "0 6 * * * (Europe/Bucharest)",
+      "status": "ok",
+      "lastRun": "2026-03-30T04:26:02.626Z",
+      "nextRun": "2026-03-31T06:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
+      "name": "Recipe Collector Daily Fetch",
+      "enabled": true,
+      "schedule": "0 6 * * * (Europe/Bucharest)",
+      "status": "ok",
+      "lastRun": "2026-03-30T04:00:39.863Z",
+      "nextRun": "2026-03-31T06:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
+      "name": "recipe-collector-daily",
+      "enabled": true,
+      "schedule": "0 6 * * * (Europe/Bucharest)",
+      "status": "ok",
+      "lastRun": "2026-03-30T04:05:55.667Z",
+      "nextRun": "2026-03-31T06:00:00.000Z",
+      "consecutiveErrors": 0
+    },
+    {
+      "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
+      "name": "PostgreSQL Memory Backup",
+      "enabled": true,
+      "schedule": "0 3 * * *",
+      "status": "ok",
+      "lastRun": "2026-03-31T03:00:00.010Z",
+      "nextRun": "2026-04-01T03:00:00.000Z",
+      "consecutiveErrors": 0
     },
     {
       "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
@@ -113,7 +113,7 @@
       "name": "Dashboard Update",
       "enabled": true,
       "schedule": "0 6,18 * * * (UTC)",
-      "status": "ok",
+      "status": "running",
       "lastRun": "2026-03-30T06:03:39.923Z",
       "nextRun": "2026-03-31T06:00:00.000Z",
       "consecutiveErrors": 0
@@ -123,7 +123,7 @@
       "name": "Session PostgreSQL Sync",
       "enabled": true,
       "schedule": "0 6,18 * * * (UTC)",
-      "status": "ok",
+      "status": "running",
       "lastRun": "2026-03-30T06:00:00.012Z",
       "nextRun": "2026-03-31T06:00:00.000Z",
       "consecutiveErrors": 0
@@ -135,7 +135,7 @@
       "schedule": "0 9 * * *",
       "status": "ok",
       "lastRun": "2026-03-30T09:00:00.014Z",
-      "nextRun": "2026-03-31T11:00:00.000Z",
+      "nextRun": "2026-03-31T09:00:00.000Z",
       "consecutiveErrors": 0
     },
     {
@@ -144,8 +144,8 @@
       "enabled": true,
       "schedule": "0 18 * * 5 (Europe/Bucharest)",
       "status": "error",
-      "lastRun": "2026-03-30T18:00:00.014Z",
-      "nextRun": "2026-04-04T17:00:00.000Z",
+      "lastRun": "2026-03-28T18:00:00.014Z",
+      "nextRun": "2026-04-04T18:00:00.000Z",
       "consecutiveErrors": 1,
       "lastError": "Outbound not configured for channel: whatsapp"
     },
@@ -155,8 +155,8 @@
       "enabled": true,
       "schedule": "0 20 * * 0 (Europe/Bucharest)",
       "status": "ok",
-      "lastRun": "2026-03-30T20:00:00.016Z",
-      "nextRun": "2026-04-06T19:00:00.000Z",
+      "lastRun": "2026-03-29T20:00:00.016Z",
+      "nextRun": "2026-04-05T20:00:00.000Z",
       "consecutiveErrors": 0
     },
     {
@@ -165,17 +165,23 @@
       "enabled": true,
       "schedule": "0 21 * * 0 (Europe/Bucharest)",
       "status": "ok",
-      "lastRun": "2026-03-30T21:05:09.372Z",
-      "nextRun": "2026-04-06T20:00:00.000Z",
+      "lastRun": "2026-03-29T21:05:09.372Z",
+      "nextRun": "2026-04-05T21:00:00.000Z",
       "consecutiveErrors": 0
     }
   ],
   "recentActivity": [
     {
-      "timestamp": "2026-03-31T02:30:01.336Z",
+      "timestamp": "2026-03-31T03:13:26.948Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running"
+    },
+    {
+      "timestamp": "2026-03-31T03:00:00.010Z",
+      "type": "cron",
+      "name": "PostgreSQL Memory Backup",
+      "status": "ok"
     },
     {
       "timestamp": "2026-03-31T02:27:18.724Z",
@@ -184,15 +190,9 @@
       "status": "error"
     },
     {
-      "timestamp": "2026-03-31T02:14:51.899Z",
+      "timestamp": "2026-03-30T21:27:30.759Z",
       "type": "session",
       "name": "heartbeat",
-      "status": "done"
-    },
-    {
-      "timestamp": "2026-03-30T20:50:36.095Z",
-      "type": "session",
-      "name": "telegram:7796035659",
       "status": "done"
     },
     {
@@ -203,11 +203,12 @@
     }
   ],
   "stats": {
-    "totalCrons": 38,
-    "enabledCrons": 38,
+    "totalCrons": 44,
+    "enabledCrons": 36,
     "errorCrons": 2,
-    "okCrons": 36,
-    "totalSessions": 10,
+    "okCrons": 32,
+    "runningCrons": 2,
+    "totalSessions": 188,
     "activeSessions": 1
   }
 }
