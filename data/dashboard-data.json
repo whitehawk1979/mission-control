@@ -1,319 +1,152 @@
 {
-  "lastUpdated": "2026-03-31T15:30:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 31. 17:30:00 (EET)",
-  "systemHealth": {
-    "status": "warning",
-    "issues": 5,
-    "details": [
-      "5 crons with errors: Activity Timeline Sync (39 errors), Mission Control, Start of Day, Daily Briefing, Weekly Review"
-    ]
-  },
+  "lastUpdated": "2026-03-31T16:00:00.000Z",
   "actionRequired": [
     {
-      "type": "cron_error",
-      "severity": "critical",
-      "message": "Activity Timeline Sync - 39 consecutive errors (Telegram delivery failed)",
-      "jobId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-      "timestamp": "2026-03-31T15:30:00.000Z"
+      "type": "error",
+      "source": "cron",
+      "job": "Activity Timeline Sync",
+      "message": "40 consecutive errors - Telegram delivery requires chatId",
+      "severity": "high"
     },
     {
-      "type": "cron_error",
-      "severity": "warning",
-      "message": "Mission Control Dashboard Auto-Update - last run timeout",
-      "jobId": "2451cb36-cee9-48f4-b032-1086e387b078",
-      "timestamp": "2026-03-31T15:30:00.000Z"
+      "type": "error",
+      "source": "cron",
+      "job": "Recipe Collector Daily Multilingual Fetch",
+      "message": "Outbound not configured for channel: telegram",
+      "severity": "medium"
     },
     {
-      "type": "cron_error",
-      "severity": "warning",
-      "message": "Start of Day - WhatsApp outbound not configured",
-      "jobId": "0961291c-061e-4e99-92c0-d5648f942cc7",
-      "timestamp": "2026-03-31T15:30:00.000Z"
+      "type": "error",
+      "source": "cron",
+      "job": "Start of Day - Postgres Recall",
+      "message": "Outbound not configured for channel: whatsapp",
+      "severity": "medium"
     },
     {
-      "type": "cron_error",
-      "severity": "warning",
-      "message": "Daily Briefing - WhatsApp outbound not configured",
-      "jobId": "b62ce740-e1c5-4391-9aca-9e58a0143671",
-      "timestamp": "2026-03-31T15:30:00.000Z"
-    },
-    {
-      "type": "cron_error",
-      "severity": "warning",
-      "message": "Weekly Review - WhatsApp outbound not configured",
-      "jobId": "3231b7b1-a328-4218-9998-1b3fe1983d09",
-      "timestamp": "2026-03-31T15:30:00.000Z"
+      "type": "error",
+      "source": "cron",
+      "job": "Daily Briefing (Morzsa)",
+      "message": "Outbound not configured for channel: whatsapp",
+      "severity": "medium"
     }
   ],
   "activeNow": [
     {
-      "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
-      "label": "Mission Control Dashboard Auto-Update (current)",
+      "key": "agent:morzsa:telegram:direct:7796035659",
+      "channel": "telegram",
       "status": "running",
-      "startedAt": "2026-03-31T15:30:00.015Z",
-      "model": "glm-5:cloud"
+      "model": "glm-5:cloud",
+      "tokens": 50241
     },
     {
-      "key": "agent:morzsa:whatsapp:direct:+40770194845",
-      "label": "WhatsApp Direct (+40770194845)",
-      "status": "active",
-      "model": "glm-5:cloud"
+      "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
+      "channel": "heartbeat",
+      "label": "Mission Control Dashboard Auto-Update",
+      "status": "running",
+      "model": "glm-5:cloud",
+      "tokens": 39665
     }
   ],
   "crons": {
     "total": 39,
-    "enabled": 39,
-    "disabled": 0,
-    "summary": {
-      "ok": 7,
-      "error": 5,
-      "running": 1,
-      "pending": 26
-    },
+    "running": 2,
+    "ok": 28,
+    "error": 5,
+    "pending": 4,
     "jobs": [
       {
-        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-        "label": "Mission Control Dashboard Auto-Update",
-        "agent": "morzsa",
+        "name": "Mission Control Dashboard Auto-Update",
         "status": "running",
         "schedule": "*/30 * * * *",
-        "lastRun": "2026-03-31T15:30:00.015Z",
-        "nextRun": "2026-03-31T16:00:00.000Z"
+        "nextRun": "2026-03-31T16:30:00.000Z"
       },
       {
-        "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-        "label": "Activity Timeline Sync",
-        "agent": "morzsa",
+        "name": "Activity Timeline Sync",
         "status": "error",
         "schedule": "*/5 * * * *",
-        "lastRun": "2026-03-31T14:43:07.936Z",
-        "consecutiveErrors": 39,
-        "error": "Delivering to Telegram requires target <chatId>"
+        "consecutiveErrors": 40,
+        "lastError": "Delivering to Telegram requires target <chatId>"
       },
       {
-        "id": "acd86258-87d7-4a08-aa09-26387c156dda",
-        "label": "Dashboard Update",
-        "agent": "pajti",
+        "name": "Dashboard Update",
         "status": "ok",
         "schedule": "0 6,18 * * *",
-        "lastRun": "2026-03-31T03:21:00.441Z",
-        "nextRun": "2026-03-31T18:00:00.000Z"
+        "lastRun": "2026-03-31T14:00:00.000Z"
       },
       {
-        "id": "fba27730-005a-48fe-b75d-02c48551dd69",
-        "label": "Session PostgreSQL Sync",
-        "agent": "pajti",
+        "name": "Session PostgreSQL Sync",
         "status": "ok",
         "schedule": "0 6,18 * * *",
-        "lastRun": "2026-03-31T03:20:00.014Z",
-        "nextRun": "2026-03-31T18:00:00.000Z"
+        "lastRun": "2026-03-31T14:00:00.000Z"
       },
       {
-        "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
-        "label": "Recipe Collector Daily Multilingual Fetch",
-        "agent": "morzsa",
-        "status": "error",
-        "schedule": "0 6 * * * (Europe/Bucharest)",
-        "lastRun": "2026-03-31T06:02:12.552Z",
-        "nextRun": "2026-04-01T06:00:00.000Z",
-        "error": "Outbound not configured for channel: telegram"
-      },
-      {
-        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
-        "label": "Recipe Collector Daily Fetch",
-        "agent": "morzsa",
+        "name": "Recipe Collector Daily Fetch",
         "status": "ok",
-        "schedule": "0 6 * * * (Europe/Bucharest)",
-        "lastRun": "2026-03-31T06:00:29.198Z",
-        "nextRun": "2026-04-01T06:00:00.000Z"
+        "schedule": "0 6 * * * Europe/Bucharest",
+        "lastRun": "2026-03-31T06:00:00.000Z"
       },
       {
-        "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
-        "label": "recipe-collector-daily",
-        "agent": "morzsa",
-        "status": "ok",
-        "schedule": "0 6 * * * (Europe/Bucharest)",
-        "lastRun": "2026-03-31T06:04:19.576Z",
-        "nextRun": "2026-04-01T06:00:00.000Z"
-      },
-      {
-        "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
-        "label": "PostgreSQL Memory Backup",
-        "agent": "pajti",
+        "name": "PostgreSQL Memory Backup",
         "status": "ok",
         "schedule": "0 3 * * *",
-        "lastRun": "2026-03-31T03:00:00.022Z",
-        "nextRun": "2026-04-01T03:00:00.000Z"
+        "lastRun": "2026-03-31T03:00:00.000Z"
       },
       {
-        "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
-        "label": "Start of Day - Postgres Recall + Priorities",
-        "agent": "morzsa",
-        "status": "error",
-        "schedule": "30 6 * * 1-5 (Europe/Bucharest)",
-        "lastRun": "2026-03-31T06:30:00.019Z",
-        "nextRun": "2026-04-01T06:30:00.000Z",
-        "error": "Outbound not configured for channel: whatsapp"
-      },
-      {
-        "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
-        "label": "Daily Briefing (Morzsa)",
-        "agent": "morzsa",
-        "status": "error",
-        "schedule": "30 7 * * 1-5 (Europe/Bucharest)",
-        "lastRun": "2026-03-31T07:30:00.014Z",
-        "nextRun": "2026-04-01T07:30:00.000Z",
-        "error": "Outbound not configured for channel: whatsapp"
-      },
-      {
-        "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
-        "label": "Családi Események Emlékeztető",
-        "agent": "pajti",
+        "name": "Családi Események Emlékeztető",
         "status": "ok",
         "schedule": "0 9 * * *",
-        "lastRun": "2026-03-31T09:00:02.878Z",
-        "nextRun": "2026-04-01T09:00:00.000Z"
+        "lastRun": "2026-03-31T09:00:00.000Z"
       },
       {
-        "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
-        "label": "Weekly Review (Analyzer)",
-        "agent": "morzsa",
-        "status": "error",
-        "schedule": "0 18 * * 5 (Europe/Bucharest)",
-        "lastRun": "2026-03-27T18:00:00.014Z",
-        "nextRun": "2026-04-04T18:00:00.000Z",
-        "error": "Outbound not configured for channel: whatsapp"
+        "name": "Zsolt ügyelet emlékeztető április 6",
+        "status": "pending",
+        "schedule": "2026-04-05T20:00:00.000Z"
       },
       {
-        "id": "2d071f9b-0f3b-4d74-9a7d-43cc9e6da7e2",
-        "label": "Full System Optimization (Improver)",
-        "agent": "morzsa",
-        "status": "ok",
-        "schedule": "0 20 * * 0 (Europe/Bucharest)",
-        "lastRun": "2026-03-29T20:00:00.016Z",
-        "nextRun": "2026-04-05T20:00:00.000Z"
-      },
-      {
-        "id": "a03b6584-87f8-45f6-a496-3879546d9e03",
-        "label": "Memória Cleanup + Index Rebuild",
-        "agent": "morzsa",
-        "status": "ok",
-        "schedule": "0 21 * * 0 (Europe/Bucharest)",
-        "lastRun": "2026-03-29T21:00:00.372Z",
-        "nextRun": "2026-04-05T21:00:00.000Z"
-      }
-    ],
-    "withErrors": [
-      {
-        "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-        "label": "Activity Timeline Sync",
-        "status": "error",
-        "consecutiveErrors": 39,
-        "error": "Telegram delivery failed"
-      },
-      {
-        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-        "label": "Mission Control Dashboard Auto-Update",
-        "status": "running",
-        "lastError": "timeout"
-      },
-      {
-        "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
-        "label": "Start of Day",
-        "status": "error",
-        "error": "WhatsApp outbound not configured"
-      },
-      {
-        "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
-        "label": "Daily Briefing",
-        "status": "error",
-        "error": "WhatsApp outbound not configured"
-      },
-      {
-        "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
-        "label": "Weekly Review",
-        "status": "error",
-        "error": "WhatsApp outbound not configured"
-      }
-    ],
-    "recentSuccessful": [
-      {
-        "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
-        "label": "Családi Események Emlékeztető",
-        "status": "ok",
-        "lastRun": "2026-03-31T09:00:02.878Z"
-      },
-      {
-        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
-        "label": "Recipe Collector Daily Fetch",
-        "status": "ok",
-        "lastRun": "2026-03-31T06:00:29.198Z"
-      },
-      {
-        "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
-        "label": "recipe-collector-daily",
-        "status": "ok",
-        "lastRun": "2026-03-31T06:04:19.576Z"
-      },
-      {
-        "id": "acd86258-87d7-4a08-aa09-26387c156dda",
-        "label": "Dashboard Update",
-        "status": "ok",
-        "lastRun": "2026-03-31T03:21:00.441Z"
-      },
-      {
-        "id": "fba27730-005a-48fe-b75d-02c48551dd69",
-        "label": "Session PostgreSQL Sync",
-        "status": "ok",
-        "lastRun": "2026-03-31T03:20:00.014Z"
+        "name": "Hajnalka birthday reminder (30d)",
+        "status": "pending",
+        "schedule": "2026-04-05T09:00:00.000Z"
       }
     ]
   },
   "recentActivity": [
     {
-      "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
-      "label": "Mission Control Dashboard Auto-Update",
-      "status": "running",
-      "updatedAt": "2026-03-31T15:30:00.015Z"
+      "time": "2026-03-31T16:00:00.000Z",
+      "type": "cron",
+      "name": "Mission Control Dashboard Auto-Update",
+      "status": "running"
     },
     {
-      "key": "agent:morzsa:cron:434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
-      "label": "Activity Timeline Sync",
-      "status": "error",
-      "updatedAt": "2026-03-31T14:43:07.936Z"
+      "time": "2026-03-31T15:51:07.000Z",
+      "type": "cron",
+      "name": "Activity Timeline Sync",
+      "status": "error"
     },
     {
-      "key": "agent:pajti:cron:06587db7-d011-4a31-9fc8-5dc9ca145656",
-      "label": "Családi Események Emlékeztető",
-      "status": "done",
-      "updatedAt": "2026-03-31T09:00:02.878Z"
+      "time": "2026-03-31T14:21:15.000Z",
+      "type": "cron",
+      "name": "Dashboard Update",
+      "status": "ok"
     },
     {
-      "key": "agent:morzsa:cron:0961291c-061e-4e99-92c0-d5648f942cc7",
-      "label": "Start of Day",
-      "status": "error",
-      "updatedAt": "2026-03-31T06:30:00.019Z"
+      "time": "2026-03-31T14:20:00.000Z",
+      "type": "cron",
+      "name": "Session PostgreSQL Sync",
+      "status": "ok"
     },
     {
-      "key": "agent:morzsa:cron:b62ce740-e1c5-4391-9aca-9e58a0143671",
-      "label": "Daily Briefing",
-      "status": "error",
-      "updatedAt": "2026-03-31T07:30:00.014Z"
+      "time": "2026-03-31T09:00:00.000Z",
+      "type": "cron",
+      "name": "Családi Események Emlékeztető",
+      "status": "ok"
     }
   ],
-  "stats": {
-    "totalCronJobs": 39,
-    "enabledCronJobs": 39,
-    "disabledCronJobs": 0,
-    "healthyCrons": 34,
-    "errorCrons": 5,
-    "pendingReminders": 22
-  },
-  "brain": {
-    "status": "checking",
-    "uptimeMinutes": null,
-    "memoryMB": null,
-    "tools": 10,
-    "lastActivity": "2026-03-31T15:30:00.000Z"
+  "systemHealth": {
+    "postgres": "online",
+    "gateway": "online",
+    "nodes": {
+      "zsolt-pc": "online",
+      "ugyelet": "online"
+    }
   }
 }
