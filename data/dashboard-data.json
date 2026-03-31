@@ -1,14 +1,19 @@
 {
-  "lastUpdated": "2026-03-30T23:30:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 30. 23:30:00 UTC",
+  "lastUpdated": "2026-03-31T00:00:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 31. 00:00:00 UTC",
   "systemHealth": {
     "status": "healthy",
-    "issues": 1,
+    "issues": 2,
     "details": [
       {
         "type": "warning",
         "source": "cron",
         "message": "Activity Timeline Sync: 24 consecutive errors - Telegram delivery missing chatId"
+      },
+      {
+        "type": "warning",
+        "source": "cron",
+        "message": "Weekly Review (Analyzer): 1 consecutive error - WhatsApp outbound not configured"
       }
     ]
   },
@@ -19,6 +24,13 @@
       "jobId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
       "message": "Activity Timeline Sync cron hibás - consecutiveErrors: 24",
       "error": "Delivering to Telegram requires target <chatId>"
+    },
+    {
+      "priority": "low",
+      "source": "cron",
+      "jobId": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+      "message": "Weekly Review (Analyzer) cron hibás - consecutiveErrors: 1",
+      "error": "Outbound not configured for channel: whatsapp"
     }
   ],
   "activeNow": [
@@ -26,9 +38,10 @@
       "sessionKey": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
       "label": "Mission Control Dashboard Auto-Update",
       "status": "running",
-      "startedAt": "2026-03-30T23:30:00.028Z",
+      "startedAt": "2026-03-31T00:00:00.030Z",
       "model": "glm-5:cloud",
-      "type": "cron"
+      "type": "cron",
+      "tokens": 45021
     }
   ],
   "brain": {
@@ -47,7 +60,7 @@
       { "name": "kpi_analyze", "description": "Analyze KPIs and trends" },
       { "name": "agent_status", "description": "Get status of all agents" }
     ],
-    "lastActivity": "2026-03-30T23:30:00.000Z"
+    "lastActivity": "2026-03-31T00:00:00.000Z"
   },
   "crons": {
     "total": 38,
@@ -64,21 +77,23 @@
         "name": "Activity Timeline Sync",
         "consecutiveErrors": 24,
         "lastError": "Delivering to Telegram requires target <chatId>",
-        "lastRun": "2026-03-30T23:26:08.169Z"
+        "lastRun": "2026-03-30T23:26:08.169Z",
+        "schedule": "*/5 * * * *"
       },
       {
         "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
         "name": "Weekly Review (Analyzer)",
         "consecutiveErrors": 1,
         "lastError": "Outbound not configured for channel: whatsapp",
-        "lastRun": "2026-03-25T00:00:00.014Z"
+        "lastRun": "2026-03-25T00:00:00.014Z",
+        "schedule": "0 18 * * 5 (Europe/Bucharest)"
       }
     ],
     "recentSuccessful": [
       {
         "name": "Mission Control Dashboard Auto-Update",
-        "lastRun": "2026-03-30T23:00:00.014Z",
-        "durationMs": 92089
+        "lastRun": "2026-03-30T23:30:00.028Z",
+        "durationMs": 78217
       },
       {
         "name": "Dashboard Update",
@@ -99,12 +114,58 @@
         "name": "Daily Briefing (Morzsa)",
         "lastRun": "2026-03-30T06:20:02.121Z",
         "durationMs": 122249
+      },
+      {
+        "name": "Recipe Collector Daily Multilingual Fetch",
+        "lastRun": "2026-03-30T04:00:00.000Z",
+        "durationMs": 201426
+      }
+    ],
+    "upcoming": [
+      {
+        "name": "Activity Timeline Sync",
+        "nextRun": "2026-03-31T00:06:30.128Z",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "name": "Mission Control Dashboard Auto-Update",
+        "nextRun": "2026-03-31T00:30:00.000Z",
+        "schedule": "*/30 * * * *"
+      },
+      {
+        "name": "Start of Day - Postgres Recall + Priorities",
+        "nextRun": "2026-03-31T04:30:00.000Z",
+        "schedule": "30 6 * * 1-5 (Europe/Bucharest)"
+      },
+      {
+        "name": "Daily Briefing (Morzsa)",
+        "nextRun": "2026-03-31T05:30:00.000Z",
+        "schedule": "30 7 * * 1-5 (Europe/Bucharest)"
+      },
+      {
+        "name": "Recipe Collector Daily Fetch",
+        "nextRun": "2026-03-31T05:00:00.000Z",
+        "schedule": "0 6 * * * (Europe/Bucharest)"
       }
     ]
   },
+  "sessions": {
+    "total": 20,
+    "active": 1,
+    "recentByAgent": {
+      "morzsa": 15,
+      "pajti": 5
+    },
+    "recentStatus": {
+      "done": 16,
+      "running": 3,
+      "failed": 1,
+      "timeout": 2
+    }
+  },
   "recentActivity": [
     {
-      "timestamp": "2026-03-30T23:30:00.028Z",
+      "timestamp": "2026-03-31T00:00:00.030Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running",
@@ -145,11 +206,32 @@
   ],
   "stats": {
     "totalSessions": 20,
-    "activeSessions": 3,
-    "completedSessions": 17,
+    "activeSessions": 1,
+    "completedSessions": 16,
+    "failedSessions": 3,
     "totalCrons": 38,
     "healthyCrons": 36,
     "errorCrons": 2,
     "pendingReminders": 12
+  },
+  "nodes": {
+    "zsolt-pc": {
+      "status": "online",
+      "ip": "192.168.1.100",
+      "type": "workstation",
+      "lastCheck": "2026-03-31T00:00:00.000Z"
+    },
+    "ugyelet": {
+      "status": "online",
+      "ip": "192.168.1.89",
+      "type": "server",
+      "lastCheck": "2026-03-31T00:00:00.000Z"
+    },
+    "miki-pc": {
+      "status": "online",
+      "ip": "100.88.33.88",
+      "type": "remote",
+      "lastCheck": "2026-03-31T00:00:00.000Z"
+    }
   }
 }
