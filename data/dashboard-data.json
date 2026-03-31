@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-03-31T21:00:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 31. 21:00:00 UTC",
+  "lastUpdated": "2026-03-31T21:30:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 31. 21:30:00 UTC",
   "systemHealth": {
     "status": "degraded",
     "issues": 3,
@@ -16,9 +16,9 @@
         "message": "Dashboard Update & Session Sync: LiveSessionModelSwitchError"
       },
       {
-        "type": "stuck_session",
-        "severity": "low",
-        "message": "2 stuck cron sessions detected"
+        "type": "whatsapp_outbound",
+        "severity": "medium",
+        "message": "Multiple crons failing: Outbound not configured for channel: whatsapp"
       }
     ]
   },
@@ -52,7 +52,7 @@
       "sessionKey": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
       "label": "Mission Control Dashboard Auto-Update",
       "status": "running",
-      "startedAt": "2026-03-31T21:00:00.135Z",
+      "startedAt": "2026-03-31T21:30:00.021Z",
       "model": "glm-5:cloud"
     }
   ],
@@ -102,7 +102,7 @@
         "description": "Get status of all agents"
       }
     ],
-    "lastActivity": "2026-03-31T21:00:00.000Z"
+    "lastActivity": "2026-03-31T21:30:00.000Z"
   },
   "crons": {
     "total": 39,
@@ -169,7 +169,7 @@
         "id": "2451cb36-cee9-48f4-b032-1086e387b078",
         "name": "Mission Control Dashboard Auto-Update",
         "lastStatus": "ok",
-        "lastRunAt": "2026-03-31T20:30:00.019Z"
+        "lastRunAt": "2026-03-31T21:00:00.135Z"
       },
       {
         "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
@@ -199,10 +199,16 @@
   },
   "recentActivity": [
     {
-      "timestamp": "2026-03-31T20:30:00.000Z",
+      "timestamp": "2026-03-31T21:30:00.000Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running"
+    },
+    {
+      "timestamp": "2026-03-31T21:00:00.000Z",
+      "type": "cron",
+      "name": "Mission Control Dashboard Auto-Update",
+      "status": "ok"
     },
     {
       "timestamp": "2026-03-31T20:17:00.000Z",
@@ -214,12 +220,6 @@
       "timestamp": "2026-03-31T19:50:00.000Z",
       "type": "session",
       "name": "Telegram session (Zsolt)",
-      "status": "completed"
-    },
-    {
-      "timestamp": "2026-03-31T19:22:00.000Z",
-      "type": "session",
-      "name": "WhatsApp Hajnalka @Pajti",
       "status": "completed"
     },
     {
