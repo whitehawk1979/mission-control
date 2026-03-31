@@ -1,11 +1,12 @@
 {
-  "lastUpdated": "2026-03-31T09:00:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 31. 09:00:00",
+  "lastUpdated": "2026-03-31T09:30:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 31. 09:30:00",
   "systemHealth": {
-    "status": "healthy",
+    "status": "degraded",
     "issues": 5,
     "details": [
-      "5 cron jobs with errors (delivery configuration issues)"
+      "5 cron jobs with errors (delivery configuration issues)",
+      "Activity Timeline Sync: 33 consecutive errors"
     ]
   },
   "actionRequired": [
@@ -39,7 +40,7 @@
     },
     {
       "type": "cron_error",
-      "severity": "medium",
+      "severity": "low",
       "job": "Munkaoptimalizálás - Weekly Review (Analyzer)",
       "message": "Outbound not configured for channel: whatsapp",
       "jobId": "3231b7b1-a328-4218-9998-1b3fe1983d09"
@@ -101,18 +102,19 @@
     ],
     "recentSuccessful": [
       {
-        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-        "name": "Mission Control Dashboard Auto-Update",
-        "lastRunAt": "2026-03-31T08:30:00.323Z",
-        "lastDurationMs": 100404,
-        "nextRunAt": "2026-03-31T09:00:00.000Z"
-      },
-      {
         "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
         "name": "Családi Események Emlékeztető",
-        "lastRunAt": "2026-03-31T09:00:00.014Z",
-        "lastDurationMs": 122383,
+        "lastRunAt": "2026-03-31T09:00:00.878Z",
+        "lastDurationMs": 51940,
         "nextRunAt": "2026-04-01T09:00:00.000Z"
+      },
+      {
+        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
+        "name": "Mission Control Dashboard Auto-Update",
+        "lastRunAt": "2026-03-31T09:00:54.818Z",
+        "lastDurationMs": 107815,
+        "nextRunAt": "2026-03-31T09:30:00.000Z",
+        "runningNow": true
       },
       {
         "id": "acd86258-87d7-4a08-aa09-26387c156dda",
@@ -129,27 +131,27 @@
         "nextRunAt": "2026-03-31T18:00:00.000Z"
       },
       {
-        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
-        "name": "Recipe Collector Daily Fetch",
-        "lastRunAt": "2026-03-30T06:04:19.198Z",
-        "lastDurationMs": 230378,
+        "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
+        "name": "PostgreSQL Memory Backup",
+        "lastRunAt": "2026-03-30T03:00:00.022Z",
+        "lastDurationMs": 29176,
         "nextRunAt": "2026-03-31T18:00:00.000Z"
       }
     ]
   },
   "recentActivity": [
     {
-      "timestamp": "2026-03-31T09:00:00.000Z",
+      "timestamp": "2026-03-31T09:30:00.016Z",
       "type": "cron_running",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running"
     },
     {
-      "timestamp": "2026-03-31T09:00:00.014Z",
+      "timestamp": "2026-03-31T09:00:00.878Z",
       "type": "cron_ok",
       "name": "Családi Események Emlékeztető",
       "status": "ok",
-      "duration": "2m 2s"
+      "duration": "52s"
     },
     {
       "timestamp": "2026-03-31T08:51:43.046Z",
@@ -163,7 +165,7 @@
       "type": "cron_ok",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "ok",
-      "duration": "1m 40s"
+      "duration": "1m 48s"
     },
     {
       "timestamp": "2026-03-31T07:30:00.014Z",
