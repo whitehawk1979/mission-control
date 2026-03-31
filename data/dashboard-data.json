@@ -1,12 +1,13 @@
 {
-  "lastUpdated": "2026-03-31T13:00:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 31. 13:00:00 UTC",
+  "lastUpdated": "2026-03-31T13:30:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 31. 13:30:00 UTC",
   "systemHealth": {
     "status": "degraded",
     "issues": 5,
     "details": [
       "Activity Timeline Sync: 37 consecutive errors",
-      "4 cron jobs have delivery channel issues (whatsapp/telegram)"
+      "4 cron jobs have delivery channel issues (whatsapp/telegram)",
+      "Gateway timeout on sessions_list"
     ]
   },
   "actionRequired": [
@@ -43,7 +44,15 @@
       "severity": "medium"
     }
   ],
-  "activeNow": [],
+  "activeNow": [
+    {
+      "sessionId": "agent:morzsa:whatsapp:direct:+40770194845",
+      "agentId": "morzsa",
+      "status": "running",
+      "task": "Mission Control Dashboard Auto-Update",
+      "startedAt": "2026-03-31T13:30:00.019Z"
+    }
+  ],
   "brain": {
     "status": "connected",
     "uptimeMinutes": 1220,
@@ -60,16 +69,16 @@
       {"name": "kpi_analyze", "description": "Analyze KPIs and trends"},
       {"name": "agent_status", "description": "Get status of all agents"}
     ],
-    "lastActivity": "2026-03-31T13:00:00.000Z"
+    "lastActivity": "2026-03-31T13:30:00.000Z"
   },
   "crons": {
-    "total": 45,
-    "enabled": 42,
-    "disabled": 3,
+    "total": 39,
+    "enabled": 39,
+    "disabled": 0,
     "summary": {
-      "ok": 33,
+      "ok": 28,
       "error": 5,
-      "pending": 7
+      "pending": 6
     },
     "withErrors": [
       {
@@ -112,8 +121,8 @@
       {
         "id": "2451cb36-cee9-48f4-b032-1086e387b078",
         "name": "Mission Control Dashboard Auto-Update",
-        "lastRunAt": "2026-03-31T12:30:00.020Z",
-        "durationMs": 121941
+        "lastRunAt": "2026-03-31T12:30:00.014Z",
+        "durationMs": 103427
       },
       {
         "id": "acd86258-87d7-4a08-aa09-26387c156dda",
@@ -130,7 +139,7 @@
       {
         "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
         "name": "Recipe Collector Daily Fetch",
-        "lastRunAt": "2026-03-31T06:00:00.198Z",
+        "lastRunAt": "2026-03-31T06:00:29.198Z",
         "durationMs": 230378
       },
       {
@@ -143,11 +152,11 @@
   },
   "recentActivity": [
     {
-      "timestamp": "2026-03-31T12:30:00.020Z",
+      "timestamp": "2026-03-31T13:30:00.019Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
-      "status": "ok",
-      "durationMs": 121941
+      "status": "running",
+      "durationMs": null
     },
     {
       "timestamp": "2026-03-31T12:35:05.829Z",
@@ -157,34 +166,34 @@
       "error": "Delivering to Telegram requires target <chatId>"
     },
     {
+      "timestamp": "2026-03-31T12:30:00.014Z",
+      "type": "cron",
+      "name": "Mission Control Dashboard Auto-Update",
+      "status": "ok",
+      "durationMs": 103427
+    },
+    {
+      "timestamp": "2026-03-31T09:00:02.878Z",
+      "type": "cron",
+      "name": "Családi Események Emlékeztető",
+      "status": "ok",
+      "durationMs": 51940
+    },
+    {
       "timestamp": "2026-03-31T06:01:00.441Z",
       "type": "cron",
       "name": "Dashboard Update",
       "status": "ok",
       "durationMs": 77818
-    },
-    {
-      "timestamp": "2026-03-31T06:00:00.198Z",
-      "type": "cron",
-      "name": "Recipe Collector Daily Fetch",
-      "status": "ok",
-      "durationMs": 230378
-    },
-    {
-      "timestamp": "2026-03-31T06:00:00.287Z",
-      "type": "cron",
-      "name": "Családi Események Emlékeztető",
-      "status": "ok",
-      "durationMs": 51940
     }
   ],
   "stats": {
-    "totalSessions": 0,
-    "activeSessions": 0,
+    "totalSessions": 1,
+    "activeSessions": 1,
     "completedSessions": 0,
-    "totalCrons": 45,
-    "healthyCrons": 33,
+    "totalCrons": 39,
+    "healthyCrons": 28,
     "errorCrons": 5,
-    "pendingReminders": 7
+    "pendingReminders": 6
   }
 }
