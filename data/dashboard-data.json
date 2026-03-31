@@ -1,12 +1,13 @@
 {
-  "lastUpdated": "2026-03-31T10:00:00.000Z",
-  "lastUpdatedHuman": "2026. 03. 31. 10:00:00",
+  "lastUpdated": "2026-03-31T10:30:00.000Z",
+  "lastUpdatedHuman": "2026. 03. 31. 12:30:00 (EET)",
   "systemHealth": {
-    "status": "healthy",
-    "issues": 2,
+    "status": "degraded",
+    "issues": 5,
     "details": [
       "Activity Timeline Sync: 34 consecutive errors",
-      "5 crons with delivery errors (whatsapp/telegram not configured)"
+      "5 crons with delivery errors (whatsapp/telegram not configured)",
+      "Multiple recipe collector crons showing failed status"
     ]
   },
   "actionRequired": [
@@ -20,6 +21,11 @@
       "level": "warning",
       "message": "5 crons have delivery configuration issues",
       "jobs": ["Activity Timeline Sync", "Recipe Collector Multilingual", "Start of Day", "Daily Briefing", "Weekly Review"]
+    },
+    {
+      "level": "info",
+      "message": "3 recipe collector crons showing failed status (but last runs were ok)",
+      "jobs": ["Recipe Collector Daily Fetch", "recipe-collector-daily", "Recipe Collector Daily Multilingual Fetch"]
     }
   ],
   "activeNow": [
@@ -28,56 +34,25 @@
       "label": "Cron: Mission Control Dashboard Auto-Update",
       "status": "running",
       "model": "glm-5:cloud",
-      "startedAt": "2026-03-31T10:00:04.302Z"
+      "startedAt": "2026-03-31T10:30:00.024Z",
+      "sessionId": "84e9ab24-993f-432a-be41-e7184b3dc13b"
+    },
+    {
+      "key": "agent:morzsa:subagent:a24c9391-cc5c-4ad1-9fa7-1e1f9e444995",
+      "label": "Pajti-3D-Graph-Fix",
+      "status": "running",
+      "model": "glm-5:cloud",
+      "startedAt": "2026-03-31T10:27:56.543Z",
+      "runtimeMs": 119219,
+      "parentSession": "agent:morzsa:telegram:direct:7796035659"
     }
   ],
   "brain": {
     "status": "connected",
     "uptimeMinutes": 1031,
     "memoryMB": 14,
-    "tools": [
-      {
-        "name": "health",
-        "description": "Health check endpoint"
-      },
-      {
-        "name": "status",
-        "description": "System status"
-      },
-      {
-        "name": "tools",
-        "description": "List available tools"
-      },
-      {
-        "name": "memory_recall",
-        "description": "Recall relevant memories from PostgreSQL"
-      },
-      {
-        "name": "context_get",
-        "description": "Get current agent context"
-      },
-      {
-        "name": "context_set",
-        "description": "Set agent context for reasoning"
-      },
-      {
-        "name": "decision_log",
-        "description": "Log a decision for future reasoning"
-      },
-      {
-        "name": "decision_recall",
-        "description": "Recall similar past decisions"
-      },
-      {
-        "name": "kpi_analyze",
-        "description": "Analyze KPIs and trends"
-      },
-      {
-        "name": "agent_status",
-        "description": "Get status of all agents"
-      }
-    ],
-    "lastActivity": "2026-03-31T10:00:00.000Z"
+    "tools": 10,
+    "lastActivity": "2026-03-31T10:30:00.000Z"
   },
   "crons": {
     "total": 39,
@@ -93,100 +68,192 @@
         "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
         "name": "Activity Timeline Sync",
         "consecutiveErrors": 34,
-        "lastError": "Delivering to Telegram requires target <chatId>"
+        "lastError": "Delivering to Telegram requires target <chatId>",
+        "lastRunAt": "2026-03-31T09:52:11.647Z",
+        "nextRunAt": "2026-03-31T10:33:05.286Z"
       },
       {
         "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
         "name": "Recipe Collector Daily Multilingual Fetch",
         "consecutiveErrors": 1,
-        "lastError": "Error: Outbound not configured for channel: telegram"
+        "lastError": "Error: Outbound not configured for channel: telegram",
+        "lastRunAt": "2026-03-30T06:02:12.552Z",
+        "nextRunAt": "2026-04-01T04:00:00.000Z"
       },
       {
         "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
         "name": "Start of Day - Postgres Recall + Priorities",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp"
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "lastRunAt": "2026-03-30T05:50:00.019Z",
+        "nextRunAt": "2026-04-01T04:30:00.000Z"
       },
       {
         "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
         "name": "Munkaoptimalizálás - Daily Briefing (Morzsa)",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp"
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "lastRunAt": "2026-03-30T06:30:00.014Z",
+        "nextRunAt": "2026-04-01T05:30:00.000Z"
       },
       {
         "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
         "name": "Munkaoptimalizálás - Weekly Review (Analyzer)",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp"
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "lastRunAt": "2026-03-24T17:00:00.014Z",
+        "nextRunAt": "2026-04-04T15:00:00.000Z"
       }
     ],
     "recentSuccessful": [
       {
+        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
         "name": "Mission Control Dashboard Auto-Update",
-        "lastRun": "2026-03-31T09:50:00Z",
-        "status": "ok"
+        "lastRun": "2026-03-31T10:00:00.014Z",
+        "status": "ok",
+        "durationMs": 126966
+      },
+      {
+        "id": "acd86258-87d7-4a08-aa09-26387c156dda",
+        "name": "Dashboard Update",
+        "lastRun": "2026-03-31T06:01:00.441Z",
+        "status": "ok",
+        "durationMs": 77818
+      },
+      {
+        "id": "fba27730-005a-48fe-b75d-02c48551dd69",
+        "name": "Session PostgreSQL Sync",
+        "lastRun": "2026-03-31T06:00:00.014Z",
+        "status": "ok",
+        "durationMs": 60427
+      },
+      {
+        "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
+        "name": "Családi Események Emlékeztető",
+        "lastRun": "2026-03-31T05:00:02.878Z",
+        "status": "ok",
+        "durationMs": 51940
+      },
+      {
+        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
+        "name": "Recipe Collector Daily Fetch",
+        "lastRun": "2026-03-30T06:00:29.198Z",
+        "status": "ok",
+        "durationMs": 230378
+      }
+    ],
+    "upcoming": [
+      {
+        "name": "Activity Timeline Sync",
+        "nextRun": "2026-03-31T10:33:05.286Z"
+      },
+      {
+        "name": "Mission Control Dashboard Auto-Update",
+        "nextRun": "2026-03-31T11:00:00.000Z"
       },
       {
         "name": "Dashboard Update",
-        "lastRun": "2026-03-31T06:00:00Z",
-        "status": "ok"
+        "nextRun": "2026-03-31T18:00:00.000Z"
       },
       {
         "name": "Session PostgreSQL Sync",
-        "lastRun": "2026-03-31T06:00:00Z",
-        "status": "ok"
-      },
-      {
-        "name": "Recipe Collector Daily Fetch",
-        "lastRun": "2026-03-30T06:00:00Z",
-        "status": "ok"
+        "nextRun": "2026-03-31T18:00:00.000Z"
       },
       {
         "name": "PostgreSQL Memory Backup",
-        "lastRun": "2026-03-30T03:00:00Z",
-        "status": "ok"
+        "nextRun": "2026-04-01T03:00:00.000Z"
+      }
+    ]
+  },
+  "sessions": {
+    "total": 20,
+    "recentCompleted": 18,
+    "currentlyRunning": 2,
+    "lastSessions": [
+      {
+        "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
+        "label": "Cron: Mission Control Dashboard Auto-Update",
+        "status": "running",
+        "model": "glm-5:cloud",
+        "updatedAt": "2026-03-31T10:30:12.333Z"
+      },
+      {
+        "key": "agent:morzsa:subagent:a24c9391-cc5c-4ad1-9fa7-1e1f9e444995",
+        "label": "Pajti-3D-Graph-Fix",
+        "status": "running",
+        "model": "glm-5:cloud",
+        "updatedAt": "2026-03-31T10:28:26.321Z",
+        "runtimeMs": 119219
+      },
+      {
+        "key": "agent:morzsa:telegram:direct:7796035659",
+        "label": "Telegram Session",
+        "status": "done",
+        "model": "glm-5:cloud",
+        "updatedAt": "2026-03-31T10:28:19.947Z",
+        "totalTokens": 84835
+      },
+      {
+        "key": "agent:morzsa:whatsapp:direct:+40770194845",
+        "label": "WhatsApp Session",
+        "status": "done",
+        "model": "glm-5:cloud",
+        "updatedAt": "2026-03-31T10:26:18.579Z",
+        "totalTokens": 104593
+      },
+      {
+        "key": "agent:morzsa:main",
+        "label": "Heartbeat Session",
+        "status": "done",
+        "model": "glm-5:cloud",
+        "updatedAt": "2026-03-31T09:58:00.219Z"
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-03-31T10:00:00Z",
+      "time": "2026-03-31T10:30:00Z",
       "session": "Mission Control Dashboard Auto-Update",
       "status": "running",
       "type": "cron"
     },
     {
-      "time": "2026-03-31T09:57:00Z",
-      "session": "WhatsApp (+40770194845)",
-      "status": "done",
-      "type": "session"
+      "time": "2026-03-31T10:28:00Z",
+      "session": "Pajti-3D-Graph-Fix (subagent)",
+      "status": "running",
+      "type": "subagent"
     },
     {
-      "time": "2026-03-31T09:57:00Z",
+      "time": "2026-03-31T10:28:00Z",
       "session": "Telegram (7796035659)",
       "status": "done",
       "type": "session"
     },
     {
-      "time": "2026-03-31T09:51:00Z",
+      "time": "2026-03-31T10:26:00Z",
+      "session": "WhatsApp (+40770194845)",
+      "status": "done",
+      "type": "session"
+    },
+    {
+      "time": "2026-03-31T09:52:00Z",
       "session": "Activity Timeline Sync",
       "status": "error",
       "type": "cron"
-    },
-    {
-      "time": "2026-03-31T09:33:00Z",
-      "session": "Heartbeat check",
-      "status": "done",
-      "type": "session"
     }
   ],
   "stats": {
-    "totalSessions": 5,
-    "activeSessions": 1,
-    "completedSessions": 4,
+    "totalSessions": 20,
+    "activeSessions": 2,
+    "completedSessions": 18,
     "totalCrons": 39,
     "healthyCrons": 34,
     "errorCrons": 5,
-    "pendingReminders": 23
+    "pendingReminders": 23,
+    "totalTokensUsed": 0,
+    "modelUsage": {
+      "glm-5:cloud": "primary",
+      "gpt-oss:120b-cloud": "high-thinking tasks"
+    }
   }
 }
