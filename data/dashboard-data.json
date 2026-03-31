@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-31T16:00:00.000Z",
+  "lastUpdated": "2026-03-31T16:31:00.000Z",
   "actionRequired": [
     {
       "type": "error",
@@ -7,13 +7,6 @@
       "job": "Activity Timeline Sync",
       "message": "40 consecutive errors - Telegram delivery requires chatId",
       "severity": "high"
-    },
-    {
-      "type": "error",
-      "source": "cron",
-      "job": "Recipe Collector Daily Multilingual Fetch",
-      "message": "Outbound not configured for channel: telegram",
-      "severity": "medium"
     },
     {
       "type": "error",
@@ -28,37 +21,37 @@
       "job": "Daily Briefing (Morzsa)",
       "message": "Outbound not configured for channel: whatsapp",
       "severity": "medium"
+    },
+    {
+      "type": "error",
+      "source": "cron",
+      "job": "Weekly Review (Analyzer)",
+      "message": "Outbound not configured for channel: whatsapp",
+      "severity": "medium"
     }
   ],
   "activeNow": [
-    {
-      "key": "agent:morzsa:telegram:direct:7796035659",
-      "channel": "telegram",
-      "status": "running",
-      "model": "glm-5:cloud",
-      "tokens": 50241
-    },
     {
       "key": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
       "channel": "heartbeat",
       "label": "Mission Control Dashboard Auto-Update",
       "status": "running",
-      "model": "glm-5:cloud",
-      "tokens": 39665
+      "model": "glm-5:cloud"
     }
   ],
   "crons": {
     "total": 39,
-    "running": 2,
-    "ok": 28,
-    "error": 5,
+    "running": 1,
+    "ok": 30,
+    "error": 4,
     "pending": 4,
     "jobs": [
       {
         "name": "Mission Control Dashboard Auto-Update",
         "status": "running",
         "schedule": "*/30 * * * *",
-        "nextRun": "2026-03-31T16:30:00.000Z"
+        "nextRun": "2026-03-31T17:00:00.000Z",
+        "lastRun": "2026-03-31T16:00:00.000Z"
       },
       {
         "name": "Activity Timeline Sync",
@@ -71,31 +64,54 @@
         "name": "Dashboard Update",
         "status": "ok",
         "schedule": "0 6,18 * * *",
-        "lastRun": "2026-03-31T14:00:00.000Z"
+        "lastRun": "2026-03-31T14:00:00.000Z",
+        "nextRun": "2026-03-31T18:00:00.000Z"
       },
       {
         "name": "Session PostgreSQL Sync",
         "status": "ok",
         "schedule": "0 6,18 * * *",
-        "lastRun": "2026-03-31T14:00:00.000Z"
+        "lastRun": "2026-03-31T14:00:00.000Z",
+        "nextRun": "2026-03-31T18:00:00.000Z"
       },
       {
         "name": "Recipe Collector Daily Fetch",
         "status": "ok",
         "schedule": "0 6 * * * Europe/Bucharest",
-        "lastRun": "2026-03-31T06:00:00.000Z"
+        "lastRun": "2026-03-31T06:00:00.000Z",
+        "nextRun": "2026-04-01T06:00:00.000Z"
+      },
+      {
+        "name": "Recipe Collector Daily Multilingual Fetch",
+        "status": "error",
+        "schedule": "0 6 * * * Europe/Bucharest",
+        "lastError": "Outbound not configured for channel: telegram"
       },
       {
         "name": "PostgreSQL Memory Backup",
         "status": "ok",
         "schedule": "0 3 * * *",
-        "lastRun": "2026-03-31T03:00:00.000Z"
+        "lastRun": "2026-03-31T03:00:00.000Z",
+        "nextRun": "2026-04-01T03:00:00.000Z"
       },
       {
         "name": "Családi Események Emlékeztető",
         "status": "ok",
         "schedule": "0 9 * * *",
-        "lastRun": "2026-03-31T09:00:00.000Z"
+        "lastRun": "2026-03-31T09:00:00.000Z",
+        "nextRun": "2026-04-01T09:00:00.000Z"
+      },
+      {
+        "name": "Start of Day - Postgres Recall",
+        "status": "error",
+        "schedule": "30 6 * * 1-5 Europe/Bucharest",
+        "lastError": "Outbound not configured for channel: whatsapp"
+      },
+      {
+        "name": "Daily Briefing (Morzsa)",
+        "status": "error",
+        "schedule": "30 7 * * 1-5 Europe/Bucharest",
+        "lastError": "Outbound not configured for channel: whatsapp"
       },
       {
         "name": "Zsolt ügyelet emlékeztető április 6",
@@ -111,7 +127,7 @@
   },
   "recentActivity": [
     {
-      "time": "2026-03-31T16:00:00.000Z",
+      "time": "2026-03-31T16:31:00.000Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running"
@@ -143,7 +159,7 @@
   ],
   "systemHealth": {
     "postgres": "online",
-    "gateway": "online",
+    "gateway": "degraded",
     "nodes": {
       "zsolt-pc": "online",
       "ugyelet": "online"
