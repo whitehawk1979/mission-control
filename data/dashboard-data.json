@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-04-01T04:00:00.000Z",
-  "lastUpdatedHuman": "2026. 04. 01. 04:00:00 UTC",
+  "lastUpdated": "2026-04-01T04:32:00.000Z",
+  "lastUpdatedHuman": "2026. 04. 01. 04:32:00 UTC",
   "systemHealth": {
     "status": "degraded",
     "issues": 6,
@@ -8,7 +8,7 @@
       "Activity Timeline Sync: 52 consecutive errors - missing Telegram chatId",
       "Dashboard Update: LiveSessionModelSwitchError",
       "Session PostgreSQL Sync: LiveSessionModelSwitchError",
-      "Daily Briefing: Outbound not configured for WhatsApp",
+      "Daily Briefing: error status",
       "Weekly Review: Outbound not configured for WhatsApp",
       "PostgreSQL Memory Backup: LiveSessionModelSwitchError"
     ]
@@ -33,10 +33,16 @@
       "cronId": "fba27730-005a-48fe-b75d-02c48551dd69"
     },
     {
-      "priority": "low",
-      "message": "Daily Briefing: WhatsApp outbound not configured",
+      "priority": "medium",
+      "message": "Daily Briefing (Morzsa): last run error",
       "source": "cron",
       "cronId": "b62ce740-e1c5-4391-9aca-9e58a0143671"
+    },
+    {
+      "priority": "low",
+      "message": "Weekly Review: WhatsApp outbound not configured",
+      "source": "cron",
+      "cronId": "3231b7b1-a328-4218-9998-1b3fe1983d09"
     },
     {
       "priority": "low",
@@ -48,7 +54,7 @@
   "activeNow": [],
   "brain": {
     "status": "connected",
-    "uptimeMinutes": 2130,
+    "uptimeMinutes": 2132,
     "memoryMB": 17,
     "tools": [
       {
@@ -92,7 +98,7 @@
         "description": "Get status of all agents"
       }
     ],
-    "lastActivity": "2026-04-01T04:00:00.000Z"
+    "lastActivity": "2026-04-01T04:32:00.000Z"
   },
   "crons": {
     "total": 39,
@@ -114,7 +120,7 @@
       {
         "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
         "name": "Munkaoptimalizálás - Daily Briefing (Morzsa)",
-        "error": "Outbound not configured for channel: whatsapp",
+        "error": "last run error",
         "consecutiveErrors": 1,
         "lastRun": "2026-04-01T03:50:00.014Z"
       },
@@ -151,49 +157,54 @@
       {
         "id": "2451cb36-cee9-48f4-b032-1086e387b078",
         "name": "Mission Control Dashboard Auto-Update",
-        "lastRun": "2026-04-01T03:51:55.545Z",
-        "durationMs": 143202
+        "lastRun": "2026-04-01T04:32:00.000Z",
+        "durationMs": 0,
+        "status": "running"
+      },
+      {
+        "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
+        "name": "Start of Day - Postgres Recall + Priorities",
+        "lastRun": "2026-04-01T03:50:00.012Z",
+        "durationMs": 115533,
+        "status": "ok"
       },
       {
         "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
         "name": "Családi Események Emlékeztető",
         "lastRun": "2026-04-01T03:50:02.878Z",
-        "durationMs": 51940
+        "durationMs": 51940,
+        "status": "ok"
       },
       {
         "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
         "name": "Recipe Collector Daily Multilingual Fetch",
         "lastRun": "2026-04-01T03:50:30.548Z",
-        "durationMs": 268228
+        "durationMs": 268228,
+        "status": "ok"
       },
       {
         "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
         "name": "Recipe Collector Daily Fetch",
         "lastRun": "2026-04-01T03:50:00.549Z",
-        "durationMs": 390608
-      },
-      {
-        "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
-        "name": "recipe-collector-daily",
-        "lastRun": "2026-04-01T03:50:00.000Z",
-        "durationMs": 134759
+        "durationMs": 390608,
+        "status": "ok"
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-01T04:00:00.000Z",
+      "time": "2026-04-01T04:32:00.000Z",
       "type": "cron",
       "name": "Mission Control Dashboard Auto-Update",
       "status": "running",
       "details": "Currently executing dashboard update"
     },
     {
-      "time": "2026-04-01T03:51:55.545Z",
+      "time": "2026-04-01T04:00:00.000Z",
       "type": "cron",
-      "name": "Mission Control Dashboard Auto-Update",
+      "name": "Start of Day - Postgres Recall + Priorities",
       "status": "ok",
-      "details": "Completed in 143s"
+      "details": "Completed in 116s"
     },
     {
       "time": "2026-04-01T03:50:36.600Z",
