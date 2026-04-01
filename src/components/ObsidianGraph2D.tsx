@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect } from 'react';
 import { Network, Brain, RefreshCw, Search, X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 interface MemoryNode {
@@ -30,14 +30,52 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#9e9e9e'
 };
 
+// Global cache for memory data
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
 const CACHE_TTL = 120000;
 
-function computePositions(nodes: MemoryNode[]): Map<number, { x: number; y: number }> {
-  const positions = new Map<number, { x: number; y: number }>();
-  const centerX = 400;
-  const centerY = 250;
+// Spatial index for fast hover detection
+class SpatialIndex {
+  private nodes: Map<number, { x: number; y: number; radius: number; id: number }> = new Map();
   
+  set(id: number, x: number, y: number, radius: number) {
+    this.nodes.set(id, { id, x, y, radius });
+  }
+  
+  findNearest(x: number, y: number, threshold: number): number | null {
+    let nearest: number | null = null;
+    let minDist = Infinity;
+    
+    for (const node of this.nodes.values()) {
+      const dist = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
+      if (dist < threshold && dist < minDist) {
+        minDist = dist;
+        nearest = node.id;
+      }
+    }
+    
+    return nearest;
+  }
+  
+  clear() {
+    this.nodes.clear();
+  }
+}
+
+// Optimized position computation with caching
+const positionCache = new Map<string, Map<number, { x: number; y: number }>>();
+
+function computePositions(nodes: MemoryNode[], width: number, height: number): Map<number, { x: number; y: number }> {
+  const cacheKey = `${nodes.length}-${width}-${height}`;
+  if (positionCache.has(cacheKey)) {
+    return positionCache.get(cacheKey)!;
+  }
+  
+  const positions = new Map<number, { x: number; y: number }>();
+  const centerX = width / 2;
+  const centerY = height / 2;
+  
+  // Group by category
   const categoryGroups: Record<string, MemoryNode[]> = {};
   nodes.forEach(node => {
     const cat = node.category || 'default';
@@ -51,7 +89,7 @@ function computePositions(nodes: MemoryNode[]): Map<number, { x: number; y: numb
   categories.forEach((cat, catIndex) => {
     const groupNodes = categoryGroups[cat];
     const groupAngle = catIndex * categoryAngle;
-    const groupRadius = 150 + groupNodes.length * 3;
+    const groupRadius = Math.min(width, height) * 0.25 + groupNodes.length * 2;
     const groupCenterX = centerX + Math.cos(groupAngle) * groupRadius;
     const groupCenterY = centerY + Math.sin(groupAngle) * groupRadius;
     
@@ -64,6 +102,12 @@ function computePositions(nodes: MemoryNode[]): Map<number, { x: number; y: numb
       });
     });
   });
+  
+  // Cache it (limit cache size)
+  if (positionCache.size > 10) {
+    positionCache.clear();
+  }
+  positionCache.set(cacheKey, positions);
   
   return positions;
 }
@@ -147,86 +191,130 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
 
   useEffect(() => {
     if (allMemories.length > 0) {
-      positionsRef.current = computePositions(allMemories);
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (canvas && container) {
+        const rect = container.getBoundingClientRect();
+        positionsRef.current = computePositions(allMemories, rect.width, rect.height);
+      }
     }
   }, [allMemories]);
 
-  // Draw on canvas with GPU acceleration
+  // Memoized filtered nodes
+  const filteredNodes = useMemo(() => {
+    if (!searchQuery) return allMemories;
+    const query = searchQuery.toLowerCase();
+    return allMemories.filter(node => 
+      node.title.toLowerCase().includes(query) ||
+      node.keywords?.some(k => k.toLowerCase().includes(query))
+    );
+  }, [allMemories, searchQuery]);
+
+  // Optimized canvas drawing with RAF
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const ctx = canvas.getContext('2d', { 
-      alpha: false,
-      desynchronized: true 
-    });
-    if (!ctx) return;
+    let animationId: number;
+    let needsRedraw = true;
 
-    const dpr = window.devicePixelRatio || 1;
-    const rect = container.getBoundingClientRect();
-    
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-    
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, rect.width, rect.height);
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // Draw center node (Brain)
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 30 * zoom, 0, Math.PI * 2);
-    ctx.fillStyle = '#4a90d9';
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = `${12 * zoom}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Brain', centerX, centerY);
-    
-    // Draw connections and nodes
-    allMemories.forEach((node) => {
-      const pos = positionsRef.current.get(node.id);
-      if (!pos) return;
+    const draw = () => {
+      if (!needsRedraw) return;
+      needsRedraw = false;
+
+      const ctx = canvas.getContext('2d', { 
+        alpha: false,
+        desynchronized: true 
+      });
+      if (!ctx) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for performance
+      const rect = container.getBoundingClientRect();
       
-      const x = centerX + (pos.x - 400) * zoom;
-      const y = centerY + (pos.y - 250) * zoom;
-      const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
-      const isHovered = hoveredNode === node.id;
-      const radius = isHovered ? 10 : 6;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
       
-      // Draw connection line
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      // Draw center node (Brain)
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.lineTo(x, y);
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = isHovered ? 0.5 : 0.2;
-      ctx.lineWidth = isHovered ? 2 : 1;
-      ctx.stroke();
+      ctx.arc(centerX, centerY, Math.max(20, 30 * zoom), 0, Math.PI * 2);
+      ctx.fillStyle = '#4a90d9';
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = `${Math.max(10, 12 * zoom)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Brain', centerX, centerY);
+      
+      // Batch draw connections
+      ctx.globalAlpha = 0.2;
+      ctx.lineWidth = 1;
+      
+      filteredNodes.forEach((node) => {
+        const pos = positionsRef.current.get(node.id);
+        if (!pos) return;
+        
+        const x = centerX + (pos.x - centerX) * zoom;
+        const y = centerY + (pos.y - centerY) * zoom;
+        const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
+        const isHovered = hoveredNode === node.id;
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = isHovered ? 2 : 1;
+        ctx.globalAlpha = isHovered ? 0.5 : 0.2;
+        ctx.stroke();
+      });
+      
       ctx.globalAlpha = 1;
       
-      // Draw node
-      ctx.beginPath();
-      ctx.arc(x, y, radius * zoom, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.fill();
-      
-      // Draw label on hover
-      if (isHovered) {
-        ctx.fillStyle = '#fff';
-        ctx.font = `${11 * zoom}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillText(node.title.slice(0, 25) + (node.title.length > 25 ? '…' : ''), x, y - 15 * zoom);
-        ctx.fillStyle = '#888';
-        ctx.font = `${9 * zoom}px sans-serif`;
-        ctx.fillText(node.category, x, y - 5 * zoom);
-      }
-    });
-  }, [allMemories, zoom, hoveredNode]);
+      // Draw nodes
+      filteredNodes.forEach((node) => {
+        const pos = positionsRef.current.get(node.id);
+        if (!pos) return;
+        
+        const x = centerX + (pos.x - centerX) * zoom;
+        const y = centerY + (pos.y - centerY) * zoom;
+        const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
+        const isHovered = hoveredNode === node.id;
+        const radius = isHovered ? 10 : 6;
+        
+        // Draw node
+        ctx.beginPath();
+        ctx.arc(x, y, Math.max(4, radius * zoom), 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        
+        if (isHovered) {
+          ctx.fillStyle = '#fff';
+          ctx.font = '11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(node.title.slice(0, 25) + (node.title.length > 25 ? '...' : ''), x, y - 14);
+        }
+      });
+    };
+
+    const loop = () => {
+      if (needsRedraw) draw();
+      animationId = requestAnimationFrame(loop);
+    };
+    
+    loop();
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [filteredNodes, zoom, hoveredNode]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -240,12 +328,18 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
+    // Optimized hover detection with early exit
     let foundNode: number | null = null;
+    const threshold = 15 * zoom;
+    
     for (const [id, pos] of positionsRef.current.entries()) {
-      const nodeX = centerX + (pos.x - 400) * zoom;
-      const nodeY = centerY + (pos.y - 250) * zoom;
-      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
-      if (dist < 15 * zoom) {
+      const nodeX = centerX + (pos.x - centerX) * zoom;
+      const nodeY = centerY + (pos.y - centerY) * zoom;
+      const dx = x - nodeX;
+      const dy = y - nodeY;
+      const distSq = dx * dx + dy * dy; // Avoid sqrt for performance
+      
+      if (distSq < threshold * threshold) {
         foundNode = id;
         break;
       }
@@ -272,11 +366,16 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     const centerY = rect.height / 2;
     
     let foundNode: number | null = null;
+    const threshold = 25 * zoom;
+    
     for (const [id, pos] of positionsRef.current.entries()) {
-      const nodeX = centerX + (pos.x - 400) * zoom;
-      const nodeY = centerY + (pos.y - 250) * zoom;
-      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
-      if (dist < 25 * zoom) { // Larger touch target
+      const nodeX = centerX + (pos.x - centerX) * zoom;
+      const nodeY = centerY + (pos.y - centerY) * zoom;
+      const dx = x - nodeX;
+      const dy = y - nodeY;
+      const distSq = dx * dx + dy * dy;
+      
+      if (distSq < threshold * threshold) {
         foundNode = id;
         break;
       }
@@ -301,11 +400,16 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     const centerY = rect.height / 2;
     
     let foundNode: number | null = null;
+    const threshold = 30 * zoom;
+    
     for (const [id, pos] of positionsRef.current.entries()) {
-      const nodeX = centerX + (pos.x - 400) * zoom;
-      const nodeY = centerY + (pos.y - 250) * zoom;
-      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
-      if (dist < 30 * zoom) {
+      const nodeX = centerX + (pos.x - centerX) * zoom;
+      const nodeY = centerY + (pos.y - centerY) * zoom;
+      const dx = x - nodeX;
+      const dy = y - nodeY;
+      const distSq = dx * dx + dy * dy;
+      
+      if (distSq < threshold * threshold) {
         foundNode = id;
         break;
       }

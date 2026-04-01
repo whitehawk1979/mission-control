@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Network, Brain, RefreshCw, Search, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 interface MemoryNode {
@@ -30,10 +30,19 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#9e9e9e'
 };
 
+// Global cache
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
 const CACHE_TTL = 120000;
 
+// Optimized 3D position computation with Fibonacci sphere
+const position3DCache = new Map<number, Map<number, { x: number; y: number; z: number }>>();
+
 function compute3DPositions(nodes: MemoryNode[]): Map<number, { x: number; y: number; z: number }> {
+  const cacheKey = nodes.length;
+  if (position3DCache.has(cacheKey)) {
+    return position3DCache.get(cacheKey)!;
+  }
+  
   const positions = new Map<number, { x: number; y: number; z: number }>();
   const goldenRatio = (1 + Math.sqrt(5)) / 2;
   
@@ -48,6 +57,12 @@ function compute3DPositions(nodes: MemoryNode[]): Map<number, { x: number; y: nu
       z: radius * Math.cos(phi)
     });
   });
+  
+  // Limit cache size
+  if (position3DCache.size > 10) {
+    position3DCache.clear();
+  }
+  position3DCache.set(cacheKey, positions);
   
   return positions;
 }
