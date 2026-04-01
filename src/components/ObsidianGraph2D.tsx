@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Brain, RefreshCw, ChevronLeft, ChevronRight, Search, X, FileText, Calendar, Tag } from 'lucide-react';
+import { Network, Brain, RefreshCw, Search, X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 interface MemoryNode {
   id: number;
@@ -16,7 +16,8 @@ interface ObsidianGraph2DProps {
   onSelectMemory?: (memory: MemoryNode) => void;
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 30;
+const MAX_NODES = 100; // Hard limit for performance
 
 // Category colors
 const CATEGORY_COLORS: Record<string, string> = {
@@ -35,17 +36,56 @@ const CATEGORY_COLORS: Record<string, string> = {
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
 const CACHE_TTL = 120000;
 
+// Pre-computed positions using force-directed layout approximation
+function computePositions(nodes: MemoryNode[]): Map<number, { x: number; y: number }> {
+  const positions = new Map<number, { x: number; y: number }>();
+  const centerX = 400;
+  const centerY = 250;
+  
+  // Group by category for clustering
+  const categoryGroups: Record<string, MemoryNode[]> = {};
+  nodes.forEach(node => {
+    const cat = node.category || 'default';
+    if (!categoryGroups[cat]) categoryGroups[cat] = [];
+    categoryGroups[cat].push(node);
+  });
+  
+  // Position each category group in a circular pattern
+  const categories = Object.keys(categoryGroups);
+  const categoryAngle = (2 * Math.PI) / Math.max(categories.length, 1);
+  
+  categories.forEach((cat, catIndex) => {
+    const groupNodes = categoryGroups[cat];
+    const groupAngle = catIndex * categoryAngle;
+    const groupRadius = 150 + groupNodes.length * 3;
+    const groupCenterX = centerX + Math.cos(groupAngle) * groupRadius;
+    const groupCenterY = centerY + Math.sin(groupAngle) * groupRadius;
+    
+    // Position nodes within group
+    groupNodes.forEach((node, nodeIndex) => {
+      const nodeAngle = (nodeIndex / groupNodes.length) * 2 * Math.PI;
+      const nodeRadius = 20 + Math.sqrt(nodeIndex) * 8;
+      positions.set(node.id, {
+        x: groupCenterX + Math.cos(nodeAngle) * nodeRadius,
+        y: groupCenterY + Math.sin(nodeAngle) * nodeRadius
+      });
+    });
+  });
+  
+  return positions;
+}
+
 export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [allMemories, setAllMemories] = useState<MemoryNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const totalPages = Math.ceil(allMemories.length / ITEMS_PER_PAGE);
-  const currentPageMemories = allMemories.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const [zoom, setZoom] = useState(1);
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const positionsRef = useRef<Map<number, { x: number; y: number }>>(new Map());
 
   // Fetch memories
   const fetchMemories = useCallback(async (forceRefresh = false) => {
@@ -53,18 +93,17 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       setLoading(true);
       
       if (!forceRefresh && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
-        setAllMemories(memoryCache.data);
+        setAllMemories(memoryCache.data.slice(0, MAX_NODES));
         setLoading(false);
         return;
       }
 
-      const res = await fetch('http://localhost:3322/memory/recall?limit=500&offset=0');
+      const res = await fetch(`http://localhost:3322/memory/recall?limit=${MAX_NODES}&offset=0`);
       if (!res.ok) throw new Error('Failed to fetch');
       
       const data = await res.json();
-      const items = data.memories || [];
+      const items = (data.memories || []).slice(0, MAX_NODES);
       setAllMemories(items);
-      setPage(0);
       memoryCache = { data: items, timestamp: Date.now() };
       setLoading(false);
     } catch (err) {
@@ -91,13 +130,12 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     setLoading(true);
     
     try {
-      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=100`);
+      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=${MAX_NODES}`);
       if (!res.ok) throw new Error('Search failed');
       
       const data = await res.json();
-      const items = data.memories || data.results || [];
+      const items = (data.memories || data.results || []).slice(0, MAX_NODES);
       setAllMemories(items);
-      setPage(0);
       setLoading(false);
     } catch (err) {
       console.error('Search error:', err);
@@ -121,14 +159,124 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     fetchMemories(true);
   }, [fetchMemories]);
 
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch {
-      return dateStr;
+  // Compute positions when memories change
+  useEffect(() => {
+    if (allMemories.length > 0) {
+      positionsRef.current = computePositions(allMemories);
     }
-  };
+  }, [allMemories]);
+
+  // Draw on canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+    
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Draw center node (Brain)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 30 * zoom, 0, Math.PI * 2);
+    ctx.fillStyle = '#4a90d9';
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = `${12 * zoom}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Brain', centerX, centerY);
+    
+    // Draw connections and nodes
+    allMemories.forEach((node) => {
+      const pos = positionsRef.current.get(node.id);
+      if (!pos) return;
+      
+      const x = centerX + (pos.x - 400) * zoom;
+      const y = centerY + (pos.y - 250) * zoom;
+      const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
+      const isHovered = hoveredNode === node.id;
+      const radius = isHovered ? 10 : 6;
+      
+      // Draw connection line
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = isHovered ? 0.5 : 0.2;
+      ctx.lineWidth = isHovered ? 2 : 1;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      
+      // Draw node
+      ctx.beginPath();
+      ctx.arc(x, y, radius * zoom, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      
+      // Draw label on hover
+      if (isHovered) {
+        ctx.fillStyle = 'var(--text-primary)';
+        ctx.font = `${11 * zoom}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(node.title.slice(0, 25) + (node.title.length > 25 ? '…' : ''), x, y - 15 * zoom);
+        ctx.fillStyle = 'var(--text-muted)';
+        ctx.font = `${9 * zoom}px sans-serif`;
+        ctx.fillText(node.category, x, y - 5 * zoom);
+      }
+    });
+  }, [allMemories, zoom, hoveredNode]);
+
+  // Handle mouse move for hover
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    let foundNode: number | null = null;
+    for (const [id, pos] of positionsRef.current.entries()) {
+      const nodeX = centerX + (pos.x - 400) * zoom;
+      const nodeY = centerY + (pos.y - 250) * zoom;
+      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
+      if (dist < 15 * zoom) {
+        foundNode = id;
+        break;
+      }
+    }
+    
+    setHoveredNode(foundNode);
+    canvas.style.cursor = foundNode ? 'pointer' : 'default';
+  }, [zoom]);
+
+  // Handle click
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (hoveredNode !== null) {
+      const node = allMemories.find(n => n.id === hoveredNode);
+      if (node && onSelectMemory) {
+        onSelectMemory(node);
+      }
+    }
+  }, [hoveredNode, allMemories, onSelectMemory]);
 
   if (loading) {
     return (
@@ -140,7 +288,7 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         gap: '12px'
       }}>
         <Brain size={24} style={{ color: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
-        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading memories...</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading graph...</span>
       </div>
     );
   }
@@ -189,17 +337,17 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         gap: '12px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Brain size={16} style={{ color: 'var(--accent)' }} />
+          <Network size={16} style={{ color: 'var(--accent)' }} />
           <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-            Memory List
+            Memory Graph
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-            {allMemories.length} memories
+            {allMemories.length} nodes
           </span>
         </div>
 
         {/* Search */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '300px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '250px' }}>
           <div style={{
             position: 'relative',
             display: 'flex',
@@ -208,9 +356,8 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           }}>
             <Search size={14} style={{ position: 'absolute', left: '8px', color: 'var(--text-muted)' }} />
             <input
-              ref={searchInputRef}
               type="text"
-              placeholder="Search memories..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -242,147 +389,79 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           </div>
         </div>
 
-        <button onClick={() => fetchMemories(true)} title="Refresh"
-          style={{
-            padding: '6px',
-            borderRadius: '4px',
-            background: 'var(--bg)',
-            color: 'var(--text-secondary)',
-            border: '1px solid var(--border)',
-            cursor: 'pointer'
-          }}>
-          <RefreshCw size={12} />
-        </button>
-      </div>
-
-      {/* Memory List */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '8px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {currentPageMemories.map((memory) => (
-            <div
-              key={memory.id}
-              onClick={() => onSelectMemory?.(memory)}
-              style={{
-                padding: '12px',
-                borderRadius: '8px',
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--accent)';
-                e.currentTarget.style.background = 'var(--surface)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.background = 'var(--bg)';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default']
-                }} />
-                <span style={{
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {memory.title}
-                </span>
-                <span style={{
-                  fontSize: '10px',
-                  color: 'var(--text-muted)',
-                  background: 'var(--surface)',
-                  padding: '2px 6px',
-                  borderRadius: '4px'
-                }}>
-                  {memory.category}
-                </span>
-              </div>
-              
-              <div style={{
-                fontSize: '11px',
-                color: 'var(--text-secondary)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                marginBottom: '6px'
-              }}>
-                {memory.content?.slice(0, 100)}...
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '10px', color: 'var(--text-muted)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Calendar size={10} />
-                  {formatDate(memory.created_at)}
-                </div>
-                {memory.keywords && memory.keywords.length > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Tag size={10} />
-                    {memory.keywords.slice(0, 3).join(', ')}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '12px',
-          borderTop: '1px solid var(--border)'
-        }}>
+        {/* Zoom controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <button
-            onClick={() => setPage(p => Math.max(0, p - 1))}
-            disabled={page === 0}
+            onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
+            title="Zoom out"
             style={{
-              padding: '6px 12px',
+              padding: '4px',
               borderRadius: '4px',
-              background: page === 0 ? 'var(--bg)' : 'var(--accent)',
-              color: page === 0 ? 'var(--text-muted)' : 'var(--bg)',
-              border: 'none',
-              cursor: page === 0 ? 'not-allowed' : 'pointer',
-              fontSize: '12px'
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
             }}
           >
-            <ChevronLeft size={14} />
+            <ZoomOut size={14} />
           </button>
-          
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            {page + 1} / {totalPages}
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '40px', textAlign: 'center' }}>
+            {Math.round(zoom * 100)}%
           </span>
-          
           <button
-            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
+            onClick={() => setZoom(z => Math.min(2, z + 0.1))}
+            title="Zoom in"
             style={{
-              padding: '6px 12px',
+              padding: '4px',
               borderRadius: '4px',
-              background: page >= totalPages - 1 ? 'var(--bg)' : 'var(--accent)',
-              color: page >= totalPages - 1 ? 'var(--text-muted)' : 'var(--bg)',
-              border: 'none',
-              cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
-              fontSize: '12px'
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
             }}
           >
-            <ChevronRight size={14} />
+            <ZoomIn size={14} />
+          </button>
+          <button
+            onClick={() => setZoom(1)}
+            title="Reset zoom"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
+            }}
+          >
+            <Maximize2 size={14} />
+          </button>
+          <button
+            onClick={() => fetchMemories(true)}
+            title="Refresh"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
+            }}
+          >
+            <RefreshCw size={14} />
           </button>
         </div>
-      )}
+      </div>
+
+      {/* Canvas */}
+      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden' }}>
+        <canvas
+          ref={canvasRef}
+          onMouseMove={handleMouseMove}
+          onClick={handleClick}
+          style={{ display: 'block' }}
+        />
+      </div>
 
       {/* Legend */}
       <div style={{

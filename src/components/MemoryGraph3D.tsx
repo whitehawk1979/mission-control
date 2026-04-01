@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Network, Brain, RefreshCw, Search, X, Calendar, Tag } from 'lucide-react';
+import { Network, Brain, RefreshCw, Search, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 interface MemoryNode {
   id: number;
@@ -16,7 +16,7 @@ interface MemoryGraph3DProps {
   onSelectMemory?: (memory: MemoryNode) => void;
 }
 
-const ITEMS_PER_PAGE = 20;
+const MAX_NODES = 80;
 
 // Category colors
 const CATEGORY_COLORS: Record<string, string> = {
@@ -35,17 +35,38 @@ const CATEGORY_COLORS: Record<string, string> = {
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
 const CACHE_TTL = 120000;
 
+// 3D sphere positions
+function compute3DPositions(nodes: MemoryNode[]): Map<number, { x: number; y: number; z: number }> {
+  const positions = new Map<number, { x: number; y: number; z: number }>();
+  const goldenRatio = (1 + Math.sqrt(5)) / 2;
+  
+  nodes.forEach((node, i) => {
+    const theta = 2 * Math.PI * i / goldenRatio;
+    const phi = Math.acos(1 - 2 * (i + 0.5) / nodes.length);
+    const radius = 200 + Math.sqrt(i) * 10;
+    
+    positions.set(node.id, {
+      x: radius * Math.sin(phi) * Math.cos(theta),
+      y: radius * Math.sin(phi) * Math.sin(theta),
+      z: radius * Math.cos(phi)
+    });
+  });
+  
+  return positions;
+}
+
 export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
   const [allMemories, setAllMemories] = useState<MemoryNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const totalPages = Math.ceil(allMemories.length / ITEMS_PER_PAGE);
-  const currentPageMemories = allMemories.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const [rotationY, setRotationY] = useState(0);
+  const [rotationX, setRotationX] = useState(0);
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const positionsRef = useRef<Map<number, { x: number; y: number; z: number }>>(new Map());
+  const animationRef = useRef<number | null>(null);
 
   // Fetch memories
   const fetchMemories = useCallback(async (forceRefresh = false) => {
@@ -53,18 +74,17 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
       setLoading(true);
       
       if (!forceRefresh && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
-        setAllMemories(memoryCache.data);
+        setAllMemories(memoryCache.data.slice(0, MAX_NODES));
         setLoading(false);
         return;
       }
 
-      const res = await fetch('http://localhost:3322/memory/recall?limit=500&offset=0');
+      const res = await fetch(`http://localhost:3322/memory/recall?limit=${MAX_NODES}&offset=0`);
       if (!res.ok) throw new Error('Failed to fetch');
       
       const data = await res.json();
-      const items = data.memories || [];
+      const items = (data.memories || []).slice(0, MAX_NODES);
       setAllMemories(items);
-      setPage(0);
       memoryCache = { data: items, timestamp: Date.now() };
       setLoading(false);
     } catch (err) {
@@ -81,23 +101,20 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchQuery('');
-      setIsSearching(false);
       fetchMemories(true);
       return;
     }
 
-    setIsSearching(true);
     setSearchQuery(query);
     setLoading(true);
     
     try {
-      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=100`);
+      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=${MAX_NODES}`);
       if (!res.ok) throw new Error('Search failed');
       
       const data = await res.json();
-      const items = data.memories || data.results || [];
+      const items = (data.memories || data.results || []).slice(0, MAX_NODES);
       setAllMemories(items);
-      setPage(0);
       setLoading(false);
     } catch (err) {
       console.error('Search error:', err);
@@ -105,7 +122,6 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     }
   }, [fetchMemories]);
 
-  // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery) {
@@ -117,18 +133,176 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
-    setIsSearching(false);
     fetchMemories(true);
   }, [fetchMemories]);
 
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch {
-      return dateStr;
+  // Compute positions
+  useEffect(() => {
+    if (allMemories.length > 0) {
+      positionsRef.current = compute3DPositions(allMemories);
     }
-  };
+  }, [allMemories]);
+
+  // 3D to 2D projection
+  const project3D = useCallback((x: number, y: number, z: number, centerX: number, centerY: number) => {
+    const cosY = Math.cos(rotationY);
+    const sinY = Math.sin(rotationY);
+    const cosX = Math.cos(rotationX);
+    const sinX = Math.sin(rotationX);
+    
+    // Rotate around Y axis
+    const x1 = x * cosY - z * sinY;
+    const z1 = x * sinY + z * cosY;
+    
+    // Rotate around X axis
+    const y1 = y * cosX - z1 * sinX;
+    const z2 = y * sinX + z1 * cosX;
+    
+    // Perspective projection
+    const scale = 500 / (500 + z2);
+    
+    return {
+      x: centerX + x1 * scale,
+      y: centerY + y1 * scale,
+      scale
+    };
+  }, [rotationY, rotationX]);
+
+  // Draw on canvas
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+    
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Draw center node (Brain)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+    ctx.fillStyle = '#4a90d9';
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Brain', centerX, centerY);
+    
+    // Sort nodes by Z depth for proper layering
+    const nodesWithDepth = allMemories.map(node => {
+      const pos = positionsRef.current.get(node.id);
+      if (!pos) return null;
+      
+      const cosY = Math.cos(rotationY);
+      const sinY = Math.sin(rotationY);
+      const z = pos.x * sinY + pos.z * cosY;
+      
+      return { node, pos, z };
+    }).filter(Boolean) as { node: MemoryNode; pos: { x: number; y: number; z: number }; z: number }[];
+    
+    nodesWithDepth.sort((a, b) => b.z - a.z);
+    
+    // Draw connections first
+    nodesWithDepth.forEach(({ node, pos }) => {
+      const projected = project3D(pos.x, pos.y, pos.z, centerX, centerY);
+      const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
+      
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(projected.x, projected.y);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.15;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+    
+    // Draw nodes
+    nodesWithDepth.forEach(({ node, pos }) => {
+      const projected = project3D(pos.x, pos.y, pos.z, centerX, centerY);
+      const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
+      const isHovered = hoveredNode === node.id;
+      const radius = isHovered ? 8 : 5 * projected.scale;
+      
+      ctx.beginPath();
+      ctx.arc(projected.x, projected.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.3 + projected.scale * 0.5;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      
+      if (isHovered) {
+        ctx.fillStyle = 'var(--text-primary)';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(node.title.slice(0, 20), projected.x, projected.y - 12);
+      }
+    });
+  }, [allMemories, rotationY, rotationX, hoveredNode, project3D]);
+
+  // Animation loop
+  useEffect(() => {
+    draw();
+  }, [draw]);
+
+  // Mouse handlers
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    let foundNode: number | null = null;
+    for (const [id, pos] of positionsRef.current.entries()) {
+      const projected = project3D(pos.x, pos.y, pos.z, centerX, centerY);
+      const dist = Math.sqrt((mouseX - projected.x) ** 2 + (mouseY - projected.y) ** 2);
+      if (dist < 15) {
+        foundNode = id;
+        break;
+      }
+    }
+    
+    setHoveredNode(foundNode);
+    canvas.style.cursor = foundNode ? 'pointer' : 'default';
+  }, [project3D]);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (hoveredNode !== null) {
+      const node = allMemories.find(n => n.id === hoveredNode);
+      if (node && onSelectMemory) {
+        onSelectMemory(node);
+      }
+    }
+  }, [hoveredNode, allMemories, onSelectMemory]);
+
+  const handleDrag = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (e.buttons !== 1) return;
+    
+    const movementX = e.movementX || 0;
+    const movementY = e.movementY || 0;
+    
+    setRotationY(r => r + movementX * 0.01);
+    setRotationX(r => Math.max(-Math.PI / 2, Math.min(Math.PI / 2, r + movementY * 0.01)));
+  }, []);
 
   if (loading) {
     return (
@@ -140,7 +314,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
         gap: '12px'
       }}>
         <Brain size={24} style={{ color: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
-        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading memories...</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading 3D graph...</span>
       </div>
     );
   }
@@ -191,15 +365,15 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Network size={16} style={{ color: 'var(--accent)' }} />
           <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-            Memory Explorer
+            3D Memory Graph
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-            {allMemories.length} memories
+            {allMemories.length} nodes
           </span>
         </div>
 
         {/* Search */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '300px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '250px' }}>
           <div style={{
             position: 'relative',
             display: 'flex',
@@ -208,9 +382,8 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
           }}>
             <Search size={14} style={{ position: 'absolute', left: '8px', color: 'var(--text-muted)' }} />
             <input
-              ref={searchInputRef}
               type="text"
-              placeholder="Search memories..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -242,177 +415,94 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
           </div>
         </div>
 
-        <button onClick={() => fetchMemories(true)} title="Refresh"
-          style={{
-            padding: '6px',
-            borderRadius: '4px',
-            background: 'var(--bg)',
-            color: 'var(--text-secondary)',
-            border: '1px solid var(--border)',
-            cursor: 'pointer'
-          }}>
-          <RefreshCw size={12} />
-        </button>
+        {/* Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            onClick={() => setRotationY(r => r - 0.3)}
+            title="Rotate left"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
+            }}
+          >
+            <ZoomOut size={14} />
+          </button>
+          <button
+            onClick={() => setRotationY(r => r + 0.3)}
+            title="Rotate right"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
+            }}
+          >
+            <ZoomIn size={14} />
+          </button>
+          <button
+            onClick={() => { setRotationY(0); setRotationX(0); }}
+            title="Reset view"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
+            }}
+          >
+            <RotateCcw size={14} />
+          </button>
+          <button
+            onClick={() => fetchMemories(true)}
+            title="Refresh"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer'
+            }}
+          >
+            <RefreshCw size={14} />
+          </button>
+        </div>
       </div>
 
-      {/* Category Filter */}
+      {/* Canvas */}
+      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden' }}>
+        <canvas
+          ref={canvasRef}
+          onMouseMove={handleMouseMove}
+          onClick={handleClick}
+          onMouseDown={handleDrag}
+          style={{ display: 'block' }}
+        />
+      </div>
+
+      {/* Legend */}
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
         gap: '8px',
-        padding: '12px 16px',
-        borderBottom: '1px solid var(--border)'
+        padding: '8px 16px',
+        borderTop: '1px solid var(--border)',
+        background: 'var(--bg)'
       }}>
-        {Object.entries(CATEGORY_COLORS).map(([cat, color]) => (
-          <button
-            key={cat}
-            style={{
-              padding: '4px 10px',
-              borderRadius: '12px',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-secondary)',
-              fontSize: '11px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: color }} />
-            {cat}
-          </button>
+        {Object.entries(CATEGORY_COLORS).slice(0, 8).map(([cat, color]) => (
+          <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cat}</span>
+          </div>
         ))}
       </div>
-
-      {/* Memory Cards Grid */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '16px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '12px'
-        }}>
-          {currentPageMemories.map((memory) => (
-            <div
-              key={memory.id}
-              onClick={() => onSelectMemory?.(memory)}
-              style={{
-                padding: '14px',
-                borderRadius: '10px',
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default'];
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <div style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  background: CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default'],
-                  boxShadow: `0 0 8px ${CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default']}60`
-                }} />
-                <span style={{
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {memory.title}
-                </span>
-              </div>
-              
-              <div style={{
-                fontSize: '11px',
-                color: 'var(--text-secondary)',
-                lineHeight: '1.4',
-                marginBottom: '10px',
-                height: '42px',
-                overflow: 'hidden'
-              }}>
-                {memory.content?.slice(0, 150)}...
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Calendar size={10} />
-                  {formatDate(memory.created_at)}
-                </div>
-                <div style={{
-                  background: 'var(--surface)',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  color: CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default']
-                }}>
-                  {memory.category}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '12px',
-          borderTop: '1px solid var(--border)'
-        }}>
-          <button
-            onClick={() => setPage(p => Math.max(0, p - 1))}
-            disabled={page === 0}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              background: page === 0 ? 'var(--bg)' : 'var(--accent)',
-              color: page === 0 ? 'var(--text-muted)' : 'var(--bg)',
-              border: 'none',
-              cursor: page === 0 ? 'not-allowed' : 'pointer',
-              fontSize: '12px'
-            }}
-          >
-            Previous
-          </button>
-          
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            Page {page + 1} of {totalPages}
-          </span>
-          
-          <button
-            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              background: page >= totalPages - 1 ? 'var(--bg)' : 'var(--accent)',
-              color: page >= totalPages - 1 ? 'var(--text-muted)' : 'var(--bg)',
-              border: 'none',
-              cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
-              fontSize: '12px'
-            }}
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   );
 }
