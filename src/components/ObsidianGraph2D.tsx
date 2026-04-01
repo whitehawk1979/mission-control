@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Network, Brain, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MemoryNode {
@@ -15,86 +15,20 @@ interface ObsidianGraph2DProps {
   onSelectMemory?: (memory: MemoryNode) => void;
 }
 
-// Memoized node component for better performance
-const MemoryNodeComponent = memo(({ 
-  node, 
-  x, 
-  y, 
-  isHovered, 
-  onHover, 
-  onClick 
-}: { 
-  node: MemoryNode; 
-  x: number; 
-  y: number; 
-  isHovered: boolean;
-  onHover: (id: number | null) => void;
-  onClick: (node: MemoryNode) => void;
-}) => {
-  const categoryColors: Record<string, string> = {
-    'system': '#4a90d9',
-    'family': '#e91e63',
-    'project': '#ff9800',
-    'preference': '#9c27b0',
-    'knowledge': '#4caf50',
-    'task': '#f44336',
-    'devil_critique': '#ff5722',
-    'delegation_decision': '#607d8b',
-    'default': '#9e9e9e'
-  };
+const ITEMS_PER_PAGE = 10; // Even fewer nodes for better performance
 
-  const color = categoryColors[node.category] || categoryColors['default'];
-
-  return (
-    <g
-      transform={`translate(${x}, ${y})`}
-      onMouseEnter={() => onHover(node.id)}
-      onMouseLeave={() => onHover(null)}
-      onClick={() => onClick(node)}
-      style={{ cursor: 'pointer' }}
-    >
-      {/* Connection line to center */}
-      <line
-        x1={-x}
-        y1={-y}
-        x2={0}
-        y2={0}
-        stroke={color}
-        strokeWidth={isHovered ? 2 : 1}
-        strokeOpacity={0.3}
-        style={{ transition: 'stroke-width 0.15s ease' }}
-      />
-      <circle r={isHovered ? 8 : 6} fill={color} style={{ transition: 'r 0.15s ease' }} />
-      {isHovered && (
-        <>
-          <text
-            y={-15}
-            textAnchor="middle"
-            fill="var(--text-primary)"
-            fontSize={11}
-            fontWeight={600}
-            style={{ pointerEvents: 'none' }}
-          >
-            {node.title.length > 25 ? node.title.slice(0, 24) + '…' : node.title}
-          </text>
-          <text
-            y={-3}
-            textAnchor="middle"
-            fill="var(--text-muted)"
-            fontSize={8}
-            style={{ pointerEvents: 'none' }}
-          >
-            {node.category}
-          </text>
-        </>
-      )}
-    </g>
-  );
-});
-
-MemoryNodeComponent.displayName = 'MemoryNodeComponent';
-
-const ITEMS_PER_PAGE = 15; // Reduced from 30 for better performance
+// Category colors
+const CATEGORY_COLORS: Record<string, string> = {
+  'system': '#4a90d9',
+  'family': '#e91e63',
+  'project': '#ff9800',
+  'preference': '#9c27b0',
+  'knowledge': '#4caf50',
+  'task': '#f44336',
+  'devil_critique': '#ff5722',
+  'delegation_decision': '#607d8b',
+  'default': '#9e9e9e'
+};
 
 // Simple in-memory cache
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
@@ -104,16 +38,17 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [memories, setMemories] = useState<MemoryNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
   const [page, setPage] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const nodePositions = useRef<Map<number, { x: number; y: number }>>(new Map());
 
-  // Fetch memories with pagination and caching
+  // Fetch memories with caching
   const fetchMemories = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
       
-      // Check cache first (only for first page)
       if (!forceRefresh && page === 0 && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
         setMemories(memoryCache.data);
         setLoading(false);
@@ -125,13 +60,11 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       const data = await res.json();
       const fetchedMemories = data.memories || [];
       
-      // Cache only first page
       if (page === 0) {
         memoryCache = { data: fetchedMemories, timestamp: Date.now() };
       }
       
       setMemories(fetchedMemories);
-      setTotalCount(data.total || fetchedMemories.length);
     } catch (err) {
       setError('Failed to load memories');
       console.error(err);
@@ -144,48 +77,140 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     fetchMemories();
   }, [fetchMemories]);
 
-  // Calculate positions using simple spiral layout (optimized)
-  const { positions, svgDimensions } = useMemo(() => {
-    if (memories.length === 0) return { positions: new Map(), svgDimensions: { width: 800, height: 500 } };
-
+  // Calculate node positions (simple spiral)
+  useEffect(() => {
     const positions = new Map<number, { x: number; y: number }>();
     const centerX = 400;
     const centerY = 250;
     
-    // Simple spiral layout - no category grouping
     memories.forEach((node, i) => {
       const angle = i * 2.4; // Golden angle
-      const radius = 20 + Math.sqrt(i) * 35; // Spiral radius
+      const radius = 30 + Math.sqrt(i) * 40;
       positions.set(node.id, {
         x: centerX + Math.cos(angle) * radius,
         y: centerY + Math.sin(angle) * radius
       });
     });
-
-    return { 
-      positions, 
-      svgDimensions: { width: 800, height: 500 } 
-    };
+    
+    nodePositions.current = positions;
   }, [memories]);
 
-  // Category colors for legend
-  const categoryColors: Record<string, string> = {
-    'system': '#4a90d9',
-    'family': '#e91e63',
-    'project': '#ff9800',
-    'preference': '#9c27b0',
-    'knowledge': '#4caf50',
-    'task': '#f44336',
-    'devil_critique': '#ff5722',
-    'delegation_decision': '#607d8b',
-    'default': '#9e9e9e'
-  };
+  // Draw canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-  const handleNodeClick = useCallback((node: MemoryNode) => {
-    if (onSelectMemory) {
-      onSelectMemory(node);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+    
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    
+    ctx.scale(dpr, dpr);
+    
+    // Clear
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#1a1a2e';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    
+    // Draw center node
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4a90d9';
+    ctx.fill();
+    
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#1a1a2e';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Brain', centerX, centerY);
+    
+    // Draw nodes
+    memories.forEach((node, i) => {
+      const pos = nodePositions.current.get(node.id);
+      if (!pos) return;
+      
+      const x = pos.x - 400 + centerX; // Offset from center
+      const y = pos.y - 250 + centerY;
+      
+      const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
+      const isHovered = hoveredNode === node.id;
+      
+      // Draw connection line
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.3;
+      ctx.lineWidth = isHovered ? 2 : 1;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      
+      // Draw node
+      ctx.beginPath();
+      ctx.arc(x, y, isHovered ? 8 : 6, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      
+      // Draw label on hover
+      if (isHovered) {
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#fff';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(node.title.slice(0, 20) + (node.title.length > 20 ? '…' : ''), x, y - 15);
+        
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#888';
+        ctx.font = '8px sans-serif';
+        ctx.fillText(node.category, x, y - 5);
+      }
+    });
+  }, [memories, hoveredNode]);
+
+  // Handle mouse move for hover
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Check if hovering over any node
+    let foundNode: number | null = null;
+    for (const [id, pos] of nodePositions.current.entries()) {
+      const nodeX = pos.x - 400 + centerX;
+      const nodeY = pos.y - 250 + centerY;
+      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
+      if (dist < 10) {
+        foundNode = id;
+        break;
+      }
     }
-  }, [onSelectMemory]);
+    
+    setHoveredNode(foundNode);
+    canvas.style.cursor = foundNode ? 'pointer' : 'default';
+  }, []);
+
+  // Handle click
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (hoveredNode !== null) {
+      const node = memories.find(n => n.id === hoveredNode);
+      if (node && onSelectMemory) {
+        onSelectMemory(node);
+      }
+    }
+  }, [hoveredNode, memories, onSelectMemory]);
 
   if (loading) {
     return (
@@ -219,7 +244,10 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       }}>
         <div style={{ color: 'var(--negative)', fontSize: '14px' }}>{error}</div>
         <button
-          onClick={() => fetchMemories(true)}
+          onClick={() => {
+            memoryCache = null;
+            fetchMemories(true);
+          }}
           style={{
             padding: '8px 16px',
             borderRadius: '8px',
@@ -337,38 +365,14 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         </div>
       </div>
 
-      {/* Graph */}
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
-          style={{ backgroundColor: 'var(--bg)' }}
-        >
-          {/* Center node */}
-          <circle cx={400} cy={250} r={20} fill="var(--accent)" opacity={0.8} />
-          <text x={400} y={254} textAnchor="middle" fill="var(--bg)" fontSize={10} fontWeight={600}>
-            Brain
-          </text>
-
-          {/* Memory nodes */}
-          {memories.map((node) => {
-            const pos = positions.get(node.id);
-            if (!pos) return null;
-
-            return (
-              <MemoryNodeComponent
-                key={node.id}
-                node={node}
-                x={pos.x}
-                y={pos.y}
-                isHovered={hoveredNode === node.id}
-                onHover={setHoveredNode}
-                onClick={handleNodeClick}
-              />
-            );
-          })}
-        </svg>
+      {/* Canvas */}
+      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden' }}>
+        <canvas
+          ref={canvasRef}
+          onMouseMove={handleMouseMove}
+          onClick={handleClick}
+          style={{ display: 'block' }}
+        />
       </div>
 
       {/* Legend */}
@@ -380,7 +384,7 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         borderTop: '1px solid var(--border)',
         backgroundColor: 'var(--bg)'
       }}>
-        {Object.entries(categoryColors).slice(0, 6).map(([cat, color]) => (
+        {Object.entries(CATEGORY_COLORS).slice(0, 6).map(([cat, color]) => (
           <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <div style={{
               width: '8px',
