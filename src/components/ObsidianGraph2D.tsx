@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Network, Brain, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MemoryNode {
@@ -15,7 +15,7 @@ interface ObsidianGraph2DProps {
   onSelectMemory?: (memory: MemoryNode) => void;
 }
 
-const ITEMS_PER_PAGE = 10; // Even fewer nodes for better performance
+const ITEMS_PER_PAGE = 8; // Even fewer for instant loading
 
 // Category colors
 const CATEGORY_COLORS: Record<string, string> = {
@@ -30,187 +30,84 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#9e9e9e'
 };
 
-// Simple in-memory cache
+// Pre-computed spiral positions (static, no calculation needed)
+const SPIRAL_POSITIONS = [
+  { x: 400, y: 120 },  // 0
+  { x: 300, y: 150 },  // 1
+  { x: 500, y: 150 },  // 2
+  { x: 250, y: 200 },  // 3
+  { x: 400, y: 200 },  // 4
+  { x: 550, y: 200 },  // 5
+  { x: 200, y: 260 },  // 6
+  { x: 350, y: 280 },  // 7
+];
+
+// Simple cache
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
-const CACHE_TTL = 60000; // 60 seconds
+const CACHE_TTL = 120000; // 2 minutes
 
 export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [memories, setMemories] = useState<MemoryNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
-  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const nodePositions = useRef<Map<number, { x: number; y: number }>>(new Map());
 
-  // Fetch memories with caching
-  const fetchMemories = useCallback(async (forceRefresh = false) => {
-    try {
-      setLoading(true);
-      
-      if (!forceRefresh && page === 0 && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
-        setMemories(memoryCache.data);
-        setLoading(false);
-        return;
+  // Fetch with aggressive caching
+  useEffect(() => {
+    let cancelled = false;
+    
+    const load = async () => {
+      try {
+        // Check cache first
+        if (page === 0 && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
+          if (!cancelled) {
+            setMemories(memoryCache.data);
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (!cancelled) setLoading(true);
+        
+        const res = await fetch(`http://localhost:3322/memory/recall?limit=${ITEMS_PER_PAGE}&offset=${page * ITEMS_PER_PAGE}`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        
+        const data = await res.json();
+        const items = data.memories || [];
+        
+        if (!cancelled) {
+          setMemories(items);
+          if (page === 0) {
+            memoryCache = { data: items, timestamp: Date.now() };
+          }
+          setLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError('Failed to load');
+          setLoading(false);
+        }
       }
-      
-      const res = await fetch(`http://localhost:3322/memory/recall?limit=${ITEMS_PER_PAGE}&offset=${page * ITEMS_PER_PAGE}`);
-      if (!res.ok) throw new Error('Failed to fetch memories');
-      const data = await res.json();
-      const fetchedMemories = data.memories || [];
-      
-      if (page === 0) {
-        memoryCache = { data: fetchedMemories, timestamp: Date.now() };
-      }
-      
-      setMemories(fetchedMemories);
-    } catch (err) {
-      setError('Failed to load memories');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    load();
+    
+    return () => { cancelled = true; };
   }, [page]);
 
-  useEffect(() => {
-    fetchMemories();
-  }, [fetchMemories]);
-
-  // Calculate node positions (simple spiral)
-  useEffect(() => {
-    const positions = new Map<number, { x: number; y: number }>();
-    const centerX = 400;
-    const centerY = 250;
-    
-    memories.forEach((node, i) => {
-      const angle = i * 2.4; // Golden angle
-      const radius = 30 + Math.sqrt(i) * 40;
-      positions.set(node.id, {
-        x: centerX + Math.cos(angle) * radius,
-        y: centerY + Math.sin(angle) * radius
-      });
-    });
-    
-    nodePositions.current = positions;
+  // Pre-compute node data (no re-computation on render)
+  const nodes = useMemo(() => {
+    return memories.slice(0, ITEMS_PER_PAGE).map((node, i) => ({
+      ...node,
+      pos: SPIRAL_POSITIONS[i] || { x: 400, y: 300 },
+      color: CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default']
+    }));
   }, [memories]);
 
-  // Draw canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = container.getBoundingClientRect();
-    
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-    
-    ctx.scale(dpr, dpr);
-    
-    // Clear
-    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#1a1a2e';
-    ctx.fillRect(0, 0, rect.width, rect.height);
-    
-    // Draw center node
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
-    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4a90d9';
-    ctx.fill();
-    
-    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#1a1a2e';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Brain', centerX, centerY);
-    
-    // Draw nodes
-    memories.forEach((node, i) => {
-      const pos = nodePositions.current.get(node.id);
-      if (!pos) return;
-      
-      const x = pos.x - 400 + centerX; // Offset from center
-      const y = pos.y - 250 + centerY;
-      
-      const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
-      const isHovered = hoveredNode === node.id;
-      
-      // Draw connection line
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.lineTo(x, y);
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.3;
-      ctx.lineWidth = isHovered ? 2 : 1;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-      
-      // Draw node
-      ctx.beginPath();
-      ctx.arc(x, y, isHovered ? 8 : 6, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.fill();
-      
-      // Draw label on hover
-      if (isHovered) {
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#fff';
-        ctx.font = '11px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(node.title.slice(0, 20) + (node.title.length > 20 ? '…' : ''), x, y - 15);
-        
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#888';
-        ctx.font = '8px sans-serif';
-        ctx.fillText(node.category, x, y - 5);
-      }
-    });
-  }, [memories, hoveredNode]);
-
-  // Handle mouse move for hover
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // Check if hovering over any node
-    let foundNode: number | null = null;
-    for (const [id, pos] of nodePositions.current.entries()) {
-      const nodeX = pos.x - 400 + centerX;
-      const nodeY = pos.y - 250 + centerY;
-      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
-      if (dist < 10) {
-        foundNode = id;
-        break;
-      }
-    }
-    
-    setHoveredNode(foundNode);
-    canvas.style.cursor = foundNode ? 'pointer' : 'default';
+  const handleRefresh = useCallback(() => {
+    memoryCache = null;
+    setPage(0);
   }, []);
-
-  // Handle click
-  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (hoveredNode !== null) {
-      const node = memories.find(n => n.id === hoveredNode);
-      if (node && onSelectMemory) {
-        onSelectMemory(node);
-      }
-    }
-  }, [hoveredNode, memories, onSelectMemory]);
 
   if (loading) {
     return (
@@ -219,12 +116,10 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        width: '100%',
-        flexDirection: 'column',
         gap: '12px'
       }}>
-        <Brain size={32} className="animate-spin" style={{ color: 'var(--accent)' }} />
-        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading memory graph...</span>
+        <Brain size={24} style={{ color: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
+        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading...</span>
       </div>
     );
   }
@@ -236,33 +131,18 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        width: '100%',
         flexDirection: 'column',
-        gap: '16px',
-        backgroundColor: 'var(--card)',
-        borderRadius: '12px'
+        gap: '12px'
       }}>
-        <div style={{ color: 'var(--negative)', fontSize: '14px' }}>{error}</div>
-        <button
-          onClick={() => {
-            memoryCache = null;
-            fetchMemories(true);
-          }}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--accent)',
-            color: 'var(--bg)',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '13px',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          <RefreshCw size={14} />
+        <span style={{ color: 'var(--negative)' }}>{error}</span>
+        <button onClick={handleRefresh} style={{
+          padding: '8px 16px',
+          borderRadius: '6px',
+          background: 'var(--accent)',
+          color: 'var(--bg)',
+          border: 'none',
+          cursor: 'pointer'
+        }}>
           Retry
         </button>
       </div>
@@ -274,8 +154,7 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      width: '100%',
-      backgroundColor: 'var(--card)',
+      background: 'var(--card)',
       borderRadius: '12px',
       overflow: 'hidden'
     }}>
@@ -292,109 +171,128 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
             Memory Graph
           </span>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '8px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
             {memories.length} nodes
           </span>
         </div>
         
-        {/* Pagination */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            onClick={() => setPage(Math.max(0, page - 1))}
-            disabled={page === 0}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
             style={{
               padding: '4px 8px',
               borderRadius: '4px',
-              backgroundColor: page === 0 ? 'var(--bg)' : 'var(--accent)',
+              background: page === 0 ? 'var(--bg)' : 'var(--accent)',
               color: page === 0 ? 'var(--text-muted)' : 'var(--bg)',
               border: 'none',
               cursor: page === 0 ? 'not-allowed' : 'pointer',
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <ChevronLeft size={14} />
+              fontSize: '12px'
+            }}>
             Prev
           </button>
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            {page + 1}
-          </span>
-          <button
-            onClick={() => setPage(page + 1)}
-            disabled={memories.length < ITEMS_PER_PAGE}
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{page + 1}</span>
+          <button onClick={() => setPage(p => p + 1)} disabled={memories.length < ITEMS_PER_PAGE}
             style={{
               padding: '4px 8px',
               borderRadius: '4px',
-              backgroundColor: memories.length < ITEMS_PER_PAGE ? 'var(--bg)' : 'var(--accent)',
+              background: memories.length < ITEMS_PER_PAGE ? 'var(--bg)' : 'var(--accent)',
               color: memories.length < ITEMS_PER_PAGE ? 'var(--text-muted)' : 'var(--bg)',
               border: 'none',
               cursor: memories.length < ITEMS_PER_PAGE ? 'not-allowed' : 'pointer',
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
+              fontSize: '12px'
+            }}>
             Next
-            <ChevronRight size={14} />
           </button>
-          <button
-            onClick={() => {
-              memoryCache = null;
-              fetchMemories(true);
-            }}
-            title="Refresh"
+          <button onClick={handleRefresh} title="Refresh"
             style={{
               padding: '4px 8px',
-              borderRadius: '6px',
-              backgroundColor: 'var(--bg)',
+              borderRadius: '4px',
+              background: 'var(--bg)',
               color: 'var(--text-secondary)',
               border: '1px solid var(--border)',
               cursor: 'pointer',
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
+              fontSize: '12px'
+            }}>
             <RefreshCw size={12} />
-            Refresh
           </button>
         </div>
       </div>
 
-      {/* Canvas */}
-      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden' }}>
-        <canvas
-          ref={canvasRef}
-          onMouseMove={handleMouseMove}
-          onClick={handleClick}
-          style={{ display: 'block' }}
-        />
+      {/* Graph - Pre-computed positions with CSS transforms */}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        {/* Center node */}
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          background: 'var(--accent)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--bg)',
+          fontSize: '11px',
+          fontWeight: 600,
+          zIndex: 10
+        }}>
+          Brain
+        </div>
+
+        {/* Connection lines (static SVG for speed) */}
+        <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+          {nodes.map((node) => (
+            <line
+              key={node.id}
+              x1="50%"
+              y1="50%"
+              x2={`${(node.pos.x / 800) * 100}%`}
+              y2={`${(node.pos.y / 500) * 100}%`}
+              stroke={node.color}
+              strokeWidth="1"
+              strokeOpacity="0.3"
+            />
+          ))}
+        </svg>
+
+        {/* Memory nodes */}
+        {nodes.map((node) => (
+          <div
+            key={node.id}
+            style={{
+              position: 'absolute',
+              left: `${(node.pos.x / 800) * 100}%`,
+              top: `${(node.pos.y / 500) * 100}%`,
+              transform: 'translate(-50%, -50%)',
+              cursor: 'pointer'
+            }}
+            onClick={() => onSelectMemory?.(node)}
+            title={`${node.title} (${node.category})`}
+          >
+            <div style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              background: node.color,
+              boxShadow: '0 0 8px ' + node.color + '40'
+            }} />
+          </div>
+        ))}
       </div>
 
       {/* Legend */}
       <div style={{
         display: 'flex',
-        flexWrap: 'wrap',
-        gap: '8px',
+        gap: '12px',
         padding: '8px 16px',
         borderTop: '1px solid var(--border)',
-        backgroundColor: 'var(--bg)'
+        background: 'var(--bg)'
       }}>
         {Object.entries(CATEGORY_COLORS).slice(0, 6).map(([cat, color]) => (
           <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: color
-            }} />
-            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-              {cat}
-            </span>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cat}</span>
           </div>
         ))}
       </div>
