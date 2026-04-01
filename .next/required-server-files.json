@@ -100,7 +100,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "/home/openclaw/.openclaw/workspace/mission-control",
+    "outputFileTracingRoot": "/home/openclaw/.openclaw/workspace",
     "allowedDevOrigins": [],
     "cacheComponents": false,
     "cacheLife": {
@@ -294,12 +294,12 @@
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.mjs",
     "turbopack": {
-      "root": "/home/openclaw/.openclaw/workspace/mission-control"
+      "root": "/home/openclaw/.openclaw/workspace"
     },
     "distDirRoot": ".next"
   },
   "appDir": "/home/openclaw/.openclaw/workspace/mission-control",
-  "relativeAppDir": "",
+  "relativeAppDir": "mission-control",
   "files": [
     ".next/routes-manifest.json",
     ".next/server/pages-manifest.json",

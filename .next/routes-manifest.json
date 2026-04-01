@@ -100,12 +100,6 @@
       "namedRegex": "^/api/activities(?:/)?$"
     },
     {
-      "page": "/api/activities/log",
-      "regex": "^/api/activities/log(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/activities/log(?:/)?$"
-    },
-    {
       "page": "/api/activities/stats",
       "regex": "^/api/activities/stats(?:/)?$",
       "routeKeys": {},

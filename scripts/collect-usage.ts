@@ -135,24 +135,20 @@ async function fetchGatewayAPI(endpoint: string): Promise<any> {
   return response.json();
 }
 
+// NOTE: Gateway API returns HTML, not JSON. Use OpenClaw tools instead.
+// These functions are kept for compatibility but will return empty arrays.
 async function collectCronJobs(): Promise<CronJob[]> {
-  try {
-    const data = await fetchGatewayAPI('/cron?action=list');
-    return data.jobs || [];
-  } catch (error) {
-    console.error('Failed to fetch cron jobs:', error);
-    return [];
-  }
+  // Gateway API returns HTML, not JSON
+  // Use OpenClaw 'cron list' tool instead
+  console.log('Note: Gateway API returns HTML, not JSON. Cron data not available via HTTP.');
+  return [];
 }
 
 async function collectSessions(): Promise<Session[]> {
-  try {
-    const data = await fetchGatewayAPI('/sessions?action=list');
-    return data.sessions || [];
-  } catch (error) {
-    console.error('Failed to fetch sessions:', error);
-    return [];
-  }
+  // Gateway API returns HTML, not JSON
+  // Use OpenClaw 'sessions_list' tool instead
+  console.log('Note: Gateway API returns HTML, not JSON. Session data not available via HTTP.');
+  return [];
 }
 
 async function collectBrainStatus(): Promise<BrainStatus | null> {

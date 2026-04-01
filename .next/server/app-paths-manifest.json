@@ -23,7 +23,6 @@
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/api/actions/route": "app/api/actions/route.js",
-  "/api/activities/log/route": "app/api/activities/log/route.js",
   "/api/activities/route": "app/api/activities/route.js",
   "/api/activities/stats/route": "app/api/activities/stats/route.js",
   "/api/activities/stream/route": "app/api/activities/stream/route.js",

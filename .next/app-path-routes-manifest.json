@@ -23,7 +23,6 @@
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
   "/api/actions/route": "/api/actions",
-  "/api/activities/log/route": "/api/activities/log",
   "/api/activities/route": "/api/activities",
   "/api/activities/stats/route": "/api/activities/stats",
   "/api/activities/stream/route": "/api/activities/stream",

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Network, Brain, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getMemoryCache, setMemoryCache, debounce } from '@/lib/cache';
 
 interface MemoryNode {
   id: number;
@@ -54,40 +53,52 @@ const MemoryNodeComponent = memo(({
       onClick={() => onClick(node)}
       style={{ cursor: 'pointer' }}
     >
-      <circle
-        r={isHovered ? 20 : 16}
-        fill={isHovered ? `${color}22` : 'var(--card)'}
+      {/* Connection line to center */}
+      <line
+        x1={-x}
+        y1={-y}
+        x2={0}
+        y2={0}
         stroke={color}
         strokeWidth={isHovered ? 2 : 1}
-        style={{ transition: 'all 0.15s ease' }}
+        strokeOpacity={0.3}
+        style={{ transition: 'stroke-width 0.15s ease' }}
       />
-      <circle r={4} fill={color} />
-      <text
-        y={28}
-        textAnchor="middle"
-        fill="var(--text-primary)"
-        fontSize={isHovered ? 10 : 9}
-        fontWeight={isHovered ? 600 : 400}
-        style={{ pointerEvents: 'none' }}
-      >
-        {node.title.length > 18 ? node.title.slice(0, 17) + '…' : node.title}
-      </text>
-      <text
-        y={40}
-        textAnchor="middle"
-        fill="var(--text-muted)"
-        fontSize={7}
-        style={{ pointerEvents: 'none' }}
-      >
-        {node.category}
-      </text>
+      <circle r={isHovered ? 8 : 6} fill={color} style={{ transition: 'r 0.15s ease' }} />
+      {isHovered && (
+        <>
+          <text
+            y={-15}
+            textAnchor="middle"
+            fill="var(--text-primary)"
+            fontSize={11}
+            fontWeight={600}
+            style={{ pointerEvents: 'none' }}
+          >
+            {node.title.length > 25 ? node.title.slice(0, 24) + '…' : node.title}
+          </text>
+          <text
+            y={-3}
+            textAnchor="middle"
+            fill="var(--text-muted)"
+            fontSize={8}
+            style={{ pointerEvents: 'none' }}
+          >
+            {node.category}
+          </text>
+        </>
+      )}
     </g>
   );
 });
 
 MemoryNodeComponent.displayName = 'MemoryNodeComponent';
 
-const ITEMS_PER_PAGE = 30;
+const ITEMS_PER_PAGE = 15; // Reduced from 30 for better performance
+
+// Simple in-memory cache
+let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
+const CACHE_TTL = 60000; // 60 seconds
 
 export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [memories, setMemories] = useState<MemoryNode[]>([]);
@@ -95,31 +106,32 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [error, setError] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
   const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Fetch memories with pagination and caching
   const fetchMemories = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
       
-      // Check cache first
-      if (!forceRefresh) {
-        const cached = getMemoryCache();
-        if (cached) {
-          setMemories(cached);
-          setLoading(false);
-          return;
-        }
+      // Check cache first (only for first page)
+      if (!forceRefresh && page === 0 && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
+        setMemories(memoryCache.data);
+        setLoading(false);
+        return;
       }
       
       const res = await fetch(`http://localhost:3322/memory/recall?limit=${ITEMS_PER_PAGE}&offset=${page * ITEMS_PER_PAGE}`);
       if (!res.ok) throw new Error('Failed to fetch memories');
       const data = await res.json();
-      const memories = data.memories || [];
+      const fetchedMemories = data.memories || [];
       
-      // Cache the result
-      setMemoryCache(memories, 30000); // 30 seconds TTL
+      // Cache only first page
+      if (page === 0) {
+        memoryCache = { data: fetchedMemories, timestamp: Date.now() };
+      }
       
-      setMemories(memories);
+      setMemories(fetchedMemories);
+      setTotalCount(data.total || fetchedMemories.length);
     } catch (err) {
       setError('Failed to load memories');
       console.error(err);
@@ -132,56 +144,31 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     fetchMemories();
   }, [fetchMemories]);
 
-  // Calculate positions using simple circular layout (optimized)
+  // Calculate positions using simple spiral layout (optimized)
   const { positions, svgDimensions } = useMemo(() => {
-    if (memories.length === 0) return { positions: new Map(), svgDimensions: { width: 800, height: 600 } };
+    if (memories.length === 0) return { positions: new Map(), svgDimensions: { width: 800, height: 500 } };
 
     const positions = new Map<number, { x: number; y: number }>();
     const centerX = 400;
-    const centerY = 300;
-    const radius = Math.min(250, 50 + memories.length * 5);
+    const centerY = 250;
     
-    // Group by category
-    const categories: Record<string, MemoryNode[]> = {};
-    memories.forEach(node => {
-      if (!categories[node.category]) categories[node.category] = [];
-      categories[node.category].push(node);
-    });
-
-    const categoryKeys = Object.keys(categories);
-    const angleStep = (2 * Math.PI) / Math.max(categoryKeys.length, 1);
-
-    // Position nodes by category
-    categoryKeys.forEach((cat, catIndex) => {
-      const catNodes = categories[cat];
-      const catAngle = catIndex * angleStep;
-      const catCenterX = centerX + Math.cos(catAngle) * radius;
-      const catCenterY = centerY + Math.sin(catAngle) * radius;
-      const nodeRadius = 30 + catNodes.length * 8;
-
-      catNodes.forEach((node, nodeIndex) => {
-        const nodeAngle = (nodeIndex / catNodes.length) * 2 * Math.PI;
-        positions.set(node.id, {
-          x: catCenterX + Math.cos(nodeAngle) * nodeRadius,
-          y: catCenterY + Math.sin(nodeAngle) * nodeRadius
-        });
+    // Simple spiral layout - no category grouping
+    memories.forEach((node, i) => {
+      const angle = i * 2.4; // Golden angle
+      const radius = 20 + Math.sqrt(i) * 35; // Spiral radius
+      positions.set(node.id, {
+        x: centerX + Math.cos(angle) * radius,
+        y: centerY + Math.sin(angle) * radius
       });
     });
 
-    // Calculate SVG dimensions
-    const posArray = Array.from(positions.values());
-    const minX = Math.min(...posArray.map(p => p.x));
-    const maxX = Math.max(...posArray.map(p => p.x));
-    const minY = Math.min(...posArray.map(p => p.y));
-    const maxY = Math.max(...posArray.map(p => p.y));
-    const padding = 80;
-    const width = Math.max(800, maxX - minX + padding * 2 + 100);
-    const height = Math.max(600, maxY - minY + padding * 2 + 60);
-
-    return { positions, svgDimensions: { width, height } };
+    return { 
+      positions, 
+      svgDimensions: { width: 800, height: 500 } 
+    };
   }, [memories]);
 
-  // Category legend
+  // Category colors for legend
   const categoryColors: Record<string, string> = {
     'system': '#4a90d9',
     'family': '#e91e63',
@@ -194,6 +181,12 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     'default': '#9e9e9e'
   };
 
+  const handleNodeClick = useCallback((node: MemoryNode) => {
+    if (onSelectMemory) {
+      onSelectMemory(node);
+    }
+  }, [onSelectMemory]);
+
   if (loading) {
     return (
       <div style={{
@@ -203,20 +196,10 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         height: '100%',
         width: '100%',
         flexDirection: 'column',
-        gap: '16px',
-        backgroundColor: 'var(--card)',
-        borderRadius: '12px'
+        gap: '12px'
       }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '3px solid rgba(255, 59, 48, 0.3)',
-          borderTopColor: '#ff3b30',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Loading memories...</div>
+        <Brain size={32} className="animate-spin" style={{ color: 'var(--accent)' }} />
+        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading memory graph...</span>
       </div>
     );
   }
@@ -258,25 +241,6 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     );
   }
 
-  if (memories.length === 0) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        width: '100%',
-        flexDirection: 'column',
-        gap: '16px',
-        backgroundColor: 'var(--card)',
-        borderRadius: '12px'
-      }}>
-        <Brain size={40} style={{ opacity: 0.3 }} />
-        <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>No memories found</div>
-      </div>
-    );
-  }
-
   return (
     <div style={{
       display: 'flex',
@@ -284,13 +248,14 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       height: '100%',
       width: '100%',
       backgroundColor: 'var(--card)',
-      borderRadius: '12px'
+      borderRadius: '12px',
+      overflow: 'hidden'
     }}>
       {/* Header */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'space-between',
+        alignItems: 'center',
         padding: '12px 16px',
         borderBottom: '1px solid var(--border)'
       }}>
@@ -299,10 +264,12 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
             Memory Graph
           </span>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '8px' }}>
             {memories.length} nodes
           </span>
         </div>
+        
+        {/* Pagination */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             onClick={() => setPage(Math.max(0, page - 1))}
@@ -315,7 +282,6 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
               border: 'none',
               cursor: page === 0 ? 'not-allowed' : 'pointer',
               fontSize: '12px',
-              opacity: page === 0 ? 0.5 : 1,
               display: 'flex',
               alignItems: 'center',
               gap: '4px'
@@ -324,16 +290,19 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
             <ChevronLeft size={14} />
             Prev
           </button>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Page {page + 1}</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            {page + 1}
+          </span>
           <button
             onClick={() => setPage(page + 1)}
+            disabled={memories.length < ITEMS_PER_PAGE}
             style={{
               padding: '4px 8px',
               borderRadius: '4px',
-              backgroundColor: 'var(--accent)',
-              color: 'var(--bg)',
+              backgroundColor: memories.length < ITEMS_PER_PAGE ? 'var(--bg)' : 'var(--accent)',
+              color: memories.length < ITEMS_PER_PAGE ? 'var(--text-muted)' : 'var(--bg)',
               border: 'none',
-              cursor: 'pointer',
+              cursor: memories.length < ITEMS_PER_PAGE ? 'not-allowed' : 'pointer',
               fontSize: '12px',
               display: 'flex',
               alignItems: 'center',
@@ -343,7 +312,63 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
             Next
             <ChevronRight size={14} />
           </button>
+          <button
+            onClick={() => {
+              memoryCache = null;
+              fetchMemories(true);
+            }}
+            title="Refresh"
+            style={{
+              padding: '4px 8px',
+              borderRadius: '6px',
+              backgroundColor: 'var(--bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <RefreshCw size={12} />
+            Refresh
+          </button>
         </div>
+      </div>
+
+      {/* Graph */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <svg
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
+          style={{ backgroundColor: 'var(--bg)' }}
+        >
+          {/* Center node */}
+          <circle cx={400} cy={250} r={20} fill="var(--accent)" opacity={0.8} />
+          <text x={400} y={254} textAnchor="middle" fill="var(--bg)" fontSize={10} fontWeight={600}>
+            Brain
+          </text>
+
+          {/* Memory nodes */}
+          {memories.map((node) => {
+            const pos = positions.get(node.id);
+            if (!pos) return null;
+
+            return (
+              <MemoryNodeComponent
+                key={node.id}
+                node={node}
+                x={pos.x}
+                y={pos.y}
+                isHovered={hoveredNode === node.id}
+                onHover={setHoveredNode}
+                onClick={handleNodeClick}
+              />
+            );
+          })}
+        </svg>
       </div>
 
       {/* Legend */}
@@ -352,52 +377,22 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         flexWrap: 'wrap',
         gap: '8px',
         padding: '8px 16px',
-        borderBottom: '1px solid var(--border)'
+        borderTop: '1px solid var(--border)',
+        backgroundColor: 'var(--bg)'
       }}>
-        {Object.entries(categoryColors).slice(0, 8).map(([cat, color]) => (
-          <div key={cat} style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '10px',
-            color: 'var(--text-muted)'
-          }}>
+        {Object.entries(categoryColors).slice(0, 6).map(([cat, color]) => (
+          <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <div style={{
-              width: '6px',
-              height: '6px',
+              width: '8px',
+              height: '8px',
               borderRadius: '50%',
               backgroundColor: color
             }} />
-            {cat}
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+              {cat}
+            </span>
           </div>
         ))}
-      </div>
-
-      {/* Graph */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '16px' }}>
-        <svg
-          width={svgDimensions.width}
-          height={svgDimensions.height}
-          viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
-          style={{ display: 'block', margin: '0 auto', maxWidth: '100%' }}
-        >
-          {memories.map((memory) => {
-            const pos = positions.get(memory.id);
-            if (!pos) return null;
-            
-            return (
-              <MemoryNodeComponent
-                key={memory.id}
-                node={memory}
-                x={pos.x}
-                y={pos.y}
-                isHovered={hoveredNode === memory.id}
-                onHover={setHoveredNode}
-                onClick={onSelectMemory || (() => {})}
-              />
-            );
-          })}
-        </svg>
       </div>
     </div>
   );
