@@ -1,8 +1,8 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Text, Float } from '@react-three/drei';
-import { Suspense, useMemo } from 'react';
+import { OrbitControls, Text } from '@react-three/drei';
+import { Suspense, useMemo, memo } from 'react';
 import { FileNode } from './FileTree';
 
 interface MemoryGraph3DProps {
@@ -17,6 +17,43 @@ interface GraphNode {
   depth: number;
   children: GraphNode[];
 }
+
+// Memoized node component
+const NodeComponent = memo(({ 
+  node, 
+  position 
+}: { 
+  node: GraphNode; 
+  position: [number, number, number];
+}) => {
+  const isFile = node.type === 'file';
+  const color = isFile ? '#ff3b30' : '#4a90d9';
+  
+  return (
+    <group position={position}>
+      <mesh>
+        <sphereGeometry args={[0.25, 12, 12]} />
+        <meshStandardMaterial 
+          color={color} 
+          emissive={color}
+          emissiveIntensity={0.15}
+        />
+      </mesh>
+      <Text
+        position={[0, 0.4, 0]}
+        fontSize={0.12}
+        color="#fff"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={1.8}
+      >
+        {node.name.length > 12 ? node.name.slice(0, 11) + '…' : node.name}
+      </Text>
+    </group>
+  );
+});
+
+NodeComponent.displayName = 'NodeComponent';
 
 // Flatten file tree to nodes
 function flattenFiles(nodes: FileNode[], depth: number = 0, parentPath: string = ""): GraphNode[] {
@@ -42,63 +79,23 @@ function flattenFiles(nodes: FileNode[], depth: number = 0, parentPath: string =
   return result;
 }
 
-// Node component
-function Node({ node, position }: { node: GraphNode; position: [number, number, number] }) {
-  const isFile = node.type === 'file';
-  const color = isFile ? '#ff3b30' : '#4a90d9';
-  
-  return (
-    <Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}>
-      <group position={position}>
-        {/* Sphere */}
-        <mesh>
-          <sphereGeometry args={[0.3, 16, 16]} />
-          <meshStandardMaterial 
-            color={color} 
-            emissive={color}
-            emissiveIntensity={0.2}
-          />
-        </mesh>
-        
-        {/* Label */}
-        <Text
-          position={[0, 0.5, 0]}
-          fontSize={0.15}
-          color="#fff"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={2}
-        >
-          {node.name.length > 15 ? node.name.slice(0, 14) + '...' : node.name}
-        </Text>
-      </group>
-    </Float>
-  );
-}
-
-// Scene component
+// Scene component with LOD
 function Scene({ nodes }: { nodes: GraphNode[] }) {
-  // Calculate positions using simple tree layout
-  const { positions, edges } = useMemo(() => {
+  // Calculate positions using simple tree layout (optimized)
+  const { positions, maxDepth } = useMemo(() => {
     const positions: Map<string, [number, number, number]> = new Map();
-    const edges: Array<{ from: [number, number, number]; to: [number, number, number] }> = [];
-    
-    const nodeWidth = 2;
-    const levelHeight = 3;
+    const nodeWidth = 1.8;
+    const levelHeight = 2.5;
+    let maxDepth = 0;
     
     const positionNode = (node: GraphNode, x: number, z: number) => {
       positions.set(node.id, [x, -node.depth * levelHeight, z]);
+      maxDepth = Math.max(maxDepth, node.depth);
       
       if (node.children.length > 0) {
         const startX = x - ((node.children.length - 1) * nodeWidth) / 2;
         node.children.forEach((child, i) => {
-          const childPos: [number, number, number] = [startX + i * nodeWidth, -child.depth * levelHeight, z + 2];
-          positions.set(child.id, childPos);
-          edges.push({ 
-            from: [x, -node.depth * levelHeight, z], 
-            to: childPos 
-          });
-          positionNode(child, startX + i * nodeWidth, z + 2);
+          positionNode(child, startX + i * nodeWidth, z + 1.5);
         });
       }
     };
@@ -109,28 +106,32 @@ function Scene({ nodes }: { nodes: GraphNode[] }) {
       positionNode(node, i * nodeWidth * 2, 0);
     });
     
-    return { positions, edges };
+    return { positions, maxDepth };
   }, [nodes]);
+  
+  // Limit nodes for performance
+  const visibleNodes = nodes.slice(0, 100);
   
   return (
     <>
       {/* Ambient light */}
       <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={0.6} />
+      <pointLight position={[10, 10, 10]} intensity={0.5} />
       
       {/* Nodes */}
-      {nodes.map((node) => {
+      {visibleNodes.map((node) => {
         const pos = positions.get(node.id);
         if (!pos) return null;
-        return <Node key={node.id} node={node} position={pos} />;
+        return <NodeComponent key={node.id} node={node} position={pos} />;
       })}
       
       {/* Controls */}
       <OrbitControls 
         enableDamping 
-        dampingFactor={0.05}
-        minDistance={5}
-        maxDistance={50}
+        dampingFactor={0.1}
+        minDistance={3}
+        maxDistance={30}
+        maxPolarAngle={Math.PI / 2}
       />
     </>
   );
@@ -140,7 +141,7 @@ function Scene({ nodes }: { nodes: GraphNode[] }) {
 function LoadingFallback() {
   return (
     <mesh>
-      <boxGeometry args={[1, 1, 1]} />
+      <boxGeometry args={[0.5, 0.5, 0.5]} />
       <meshStandardMaterial color="#ff3b30" />
     </mesh>
   );
@@ -161,8 +162,8 @@ export default function MemoryGraph3D({ files }: MemoryGraph3DProps) {
         flexDirection: 'column',
         gap: '16px'
       }}>
-        <div style={{ fontSize: '48px' }}>📂</div>
-        <div>No files to visualize</div>
+        <div style={{ fontSize: '40px' }}>📂</div>
+        <div style={{ fontSize: '14px' }}>No files to visualize</div>
       </div>
     );
   }
@@ -170,8 +171,9 @@ export default function MemoryGraph3D({ files }: MemoryGraph3DProps) {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <Canvas
-        camera={{ position: [0, 0, 20], fov: 50 }}
+        camera={{ position: [0, 0, 15], fov: 50 }}
         style={{ background: '#111' }}
+        dpr={[1, 1.5]} // Limit pixel ratio for performance
       >
         <Suspense fallback={<LoadingFallback />}>
           <Scene nodes={nodes} />
