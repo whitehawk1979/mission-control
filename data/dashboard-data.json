@@ -1,240 +1,200 @@
 {
-  "lastUpdated": "2026-04-01T04:32:00.000Z",
-  "lastUpdatedHuman": "2026. 04. 01. 04:32:00 UTC",
-  "systemHealth": {
-    "status": "degraded",
-    "issues": 6,
-    "details": [
-      "Activity Timeline Sync: 52 consecutive errors - missing Telegram chatId",
-      "Dashboard Update: LiveSessionModelSwitchError",
-      "Session PostgreSQL Sync: LiveSessionModelSwitchError",
-      "Daily Briefing: error status",
-      "Weekly Review: Outbound not configured for WhatsApp",
-      "PostgreSQL Memory Backup: LiveSessionModelSwitchError"
-    ]
-  },
+  "lastUpdated": "2026-04-01T05:00:00.000Z",
   "actionRequired": [
     {
-      "priority": "high",
-      "message": "Activity Timeline Sync cron: 52 consecutive errors - fix Telegram chatId target",
+      "type": "error",
       "source": "cron",
-      "cronId": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b"
+      "jobId": "acd86258-87d7-4a08-aa09-26387c156dda",
+      "name": "Dashboard Update",
+      "message": "LiveSessionModelSwitchError: qwen cloud modell nem elérhető",
+      "consecutiveErrors": 1
     },
     {
-      "priority": "medium",
-      "message": "Dashboard Update cron: LiveSessionModelSwitchError - model switch issue",
+      "type": "error",
       "source": "cron",
-      "cronId": "acd86258-87d7-4a08-aa09-26387c156dda"
+      "jobId": "fba27730-005a-48fe-b75d-02c48551dd69",
+      "name": "Session PostgreSQL Sync",
+      "message": "LiveSessionModelSwitchError: qwen cloud modell nem elérhető",
+      "consecutiveErrors": 1
     },
     {
-      "priority": "medium",
-      "message": "Session PostgreSQL Sync: LiveSessionModelSwitchError - model switch issue",
+      "type": "error",
       "source": "cron",
-      "cronId": "fba27730-005a-48fe-b75d-02c48551dd69"
+      "jobId": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
+      "name": "PostgreSQL Memory Backup",
+      "message": "LiveSessionModelSwitchError: qwen cloud modell nem elérhető",
+      "consecutiveErrors": 1
     },
     {
-      "priority": "medium",
-      "message": "Daily Briefing (Morzsa): last run error",
+      "type": "error",
       "source": "cron",
-      "cronId": "b62ce740-e1c5-4391-9aca-9e58a0143671"
+      "jobId": "3231b7b1-a328-4218-9998-1b3fe1983d09",
+      "name": "Weekly Review",
+      "message": "Outbound not configured for channel: whatsapp",
+      "consecutiveErrors": 1
     },
     {
-      "priority": "low",
-      "message": "Weekly Review: WhatsApp outbound not configured",
-      "source": "cron",
-      "cronId": "3231b7b1-a328-4218-9998-1b3fe1983d09"
-    },
-    {
-      "priority": "low",
-      "message": "PostgreSQL Memory Backup: LiveSessionModelSwitchError",
-      "source": "cron",
-      "cronId": "8acfc5aa-4aae-432d-adfa-a4be8f54241f"
+      "type": "warning",
+      "source": "system",
+      "message": "sessions_list gateway timeout - aktív session adatok nem elérhetők"
     }
   ],
-  "activeNow": [],
-  "brain": {
-    "status": "connected",
-    "uptimeMinutes": 2132,
-    "memoryMB": 17,
-    "tools": [
-      {
-        "name": "health",
-        "description": "Health check endpoint"
-      },
-      {
-        "name": "status",
-        "description": "System status"
-      },
-      {
-        "name": "tools",
-        "description": "List available tools"
-      },
-      {
-        "name": "memory_recall",
-        "description": "Recall relevant memories from PostgreSQL"
-      },
-      {
-        "name": "context_get",
-        "description": "Get current agent context"
-      },
-      {
-        "name": "context_set",
-        "description": "Set agent context for reasoning"
-      },
-      {
-        "name": "decision_log",
-        "description": "Log a decision for future reasoning"
-      },
-      {
-        "name": "decision_recall",
-        "description": "Recall similar past decisions"
-      },
-      {
-        "name": "kpi_analyze",
-        "description": "Analyze KPIs and trends"
-      },
-      {
-        "name": "agent_status",
-        "description": "Get status of all agents"
-      }
-    ],
-    "lastActivity": "2026-04-01T04:32:00.000Z"
+  "activeNow": {
+    "available": false,
+    "error": "gateway timeout after 10000ms",
+    "sessions": []
   },
   "crons": {
     "total": 39,
     "enabled": 39,
-    "disabled": 0,
-    "summary": {
-      "ok": 33,
-      "error": 6,
-      "pending": 0
-    },
-    "withErrors": [
+    "running": 2,
+    "error": 4,
+    "jobs": [
+      {
+        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
+        "name": "Mission Control Dashboard Auto-Update",
+        "status": "running",
+        "enabled": true,
+        "lastRun": "2026-04-01T04:32:17.605Z",
+        "lastStatus": "ok",
+        "nextRun": "2026-04-01T05:30:00.000Z",
+        "schedule": "*/30 * * * *"
+      },
       {
         "id": "434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
         "name": "Activity Timeline Sync",
-        "error": "Delivering to Telegram requires target <chatId>",
-        "consecutiveErrors": 52,
-        "lastRun": "2026-04-01T03:50:36.600Z"
-      },
-      {
-        "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
-        "name": "Munkaoptimalizálás - Daily Briefing (Morzsa)",
-        "error": "last run error",
-        "consecutiveErrors": 1,
-        "lastRun": "2026-04-01T03:50:00.014Z"
-      },
-      {
-        "id": "3231b7b1-a328-4218-9998-1b3fe1983d09",
-        "name": "Munkaoptimalizálás - Weekly Review (Analyzer)",
-        "error": "Outbound not configured for channel: whatsapp",
-        "consecutiveErrors": 1,
-        "lastRun": "2026-04-01T03:50:00.014Z"
+        "status": "running",
+        "enabled": true,
+        "lastRun": "2026-04-01T04:55:00.030Z",
+        "lastStatus": "ok",
+        "nextRun": "2026-04-01T05:10:00.000Z",
+        "schedule": "*/5 * * * *"
       },
       {
         "id": "acd86258-87d7-4a08-aa09-26387c156dda",
         "name": "Dashboard Update",
-        "error": "LiveSessionModelSwitchError: Live session model switch requested",
+        "status": "error",
+        "enabled": true,
+        "lastRun": "2026-04-01T03:00:09.241Z",
+        "lastStatus": "error",
+        "lastError": "LiveSessionModelSwitchError: Live session model switch requested: ollama/qwen2.5:0.5b",
         "consecutiveErrors": 1,
-        "lastRun": "2026-04-01T03:50:09.241Z"
+        "nextRun": "2026-04-01T06:00:00.000Z",
+        "schedule": "0 6,18 * * *"
       },
       {
         "id": "fba27730-005a-48fe-b75d-02c48551dd69",
         "name": "Session PostgreSQL Sync",
-        "error": "LiveSessionModelSwitchError: Live session model switch requested",
+        "status": "error",
+        "enabled": true,
+        "lastRun": "2026-04-01T03:00:00.033Z",
+        "lastStatus": "error",
+        "lastError": "LiveSessionModelSwitchError: Live session model switch requested: ollama/qwen2.5:0.5b",
         "consecutiveErrors": 1,
-        "lastRun": "2026-04-01T03:50:00.033Z"
+        "nextRun": "2026-04-01T06:00:00.000Z",
+        "schedule": "0 6,18 * * *"
       },
       {
         "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
         "name": "PostgreSQL Memory Backup",
-        "error": "LiveSessionModelSwitchError: Live session model switch requested",
+        "status": "error",
+        "enabled": true,
+        "lastRun": "2026-04-01T03:00:00.027Z",
+        "lastStatus": "error",
+        "lastError": "LiveSessionModelSwitchError: Live session model switch requested: ollama/qwen2.5:0.5b",
         "consecutiveErrors": 1,
-        "lastRun": "2026-04-01T03:50:00.027Z"
-      }
-    ],
-    "recentSuccessful": [
-      {
-        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-        "name": "Mission Control Dashboard Auto-Update",
-        "lastRun": "2026-04-01T04:32:00.000Z",
-        "durationMs": 0,
-        "status": "running"
-      },
-      {
-        "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
-        "name": "Start of Day - Postgres Recall + Priorities",
-        "lastRun": "2026-04-01T03:50:00.012Z",
-        "durationMs": 115533,
-        "status": "ok"
+        "nextRun": "2026-04-01T06:00:00.000Z",
+        "schedule": "0 3 * * *"
       },
       {
         "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
         "name": "Családi Események Emlékeztető",
-        "lastRun": "2026-04-01T03:50:02.878Z",
-        "durationMs": 51940,
-        "status": "ok"
+        "status": "ok",
+        "enabled": true,
+        "lastRun": "2026-04-01T03:00:02.878Z",
+        "lastStatus": "ok",
+        "nextRun": "2026-04-02T09:00:00.000Z",
+        "schedule": "0 9 * * *"
       },
       {
         "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
         "name": "Recipe Collector Daily Multilingual Fetch",
-        "lastRun": "2026-04-01T03:50:30.548Z",
-        "durationMs": 268228,
-        "status": "ok"
+        "status": "ok",
+        "enabled": true,
+        "lastRun": "2026-04-01T04:48:50.548Z",
+        "lastStatus": "ok",
+        "nextRun": "2026-04-02T04:00:00.000Z",
+        "schedule": "0 6 * * * (Europe/Bucharest)"
       },
       {
         "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
         "name": "Recipe Collector Daily Fetch",
-        "lastRun": "2026-04-01T03:50:00.549Z",
-        "durationMs": 390608,
-        "status": "ok"
+        "status": "ok",
+        "enabled": true,
+        "lastRun": "2026-04-01T04:40:05.181Z",
+        "lastStatus": "ok",
+        "nextRun": "2026-04-02T04:00:00.000Z",
+        "schedule": "0 6 * * * (Europe/Bucharest)"
+      },
+      {
+        "id": "0961291c-061e-4e99-92c0-d5648f942cc7",
+        "name": "Start of Day - Postgres Recall + Priorities",
+        "status": "ok",
+        "enabled": true,
+        "lastRun": "2026-04-01T04:30:00.012Z",
+        "lastStatus": "ok",
+        "nextRun": "2026-04-02T05:30:00.000Z",
+        "schedule": "30 6 * * 1-5 (Europe/Bucharest)"
+      },
+      {
+        "id": "b62ce740-e1c5-4391-9aca-9e58a0143671",
+        "name": "Munkaoptimalizálás - Daily Briefing",
+        "status": "ok",
+        "enabled": true,
+        "lastRun": "2026-04-01T05:03:20.047Z",
+        "lastStatus": "ok",
+        "nextRun": "2026-04-02T06:30:00.000Z",
+        "schedule": "30 7 * * 1-5 (Europe/Bucharest)"
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-01T04:32:00.000Z",
-      "type": "cron",
-      "name": "Mission Control Dashboard Auto-Update",
-      "status": "running",
-      "details": "Currently executing dashboard update"
+      "timestamp": "2026-04-01T05:03:20.047Z",
+      "type": "cron_success",
+      "name": "Munkaoptimalizálás - Daily Briefing",
+      "message": "Sikeres futás, 137ms"
     },
     {
-      "time": "2026-04-01T04:00:00.000Z",
-      "type": "cron",
-      "name": "Start of Day - Postgres Recall + Priorities",
-      "status": "ok",
-      "details": "Completed in 116s"
-    },
-    {
-      "time": "2026-04-01T03:50:36.600Z",
-      "type": "cron",
+      "timestamp": "2026-04-01T04:55:00.030Z",
+      "type": "cron_success",
       "name": "Activity Timeline Sync",
-      "status": "error",
-      "details": "Error: Telegram chatId missing (52 consecutive errors)"
+      "message": "Sikeres futás, 34s"
     },
     {
-      "time": "2026-04-01T03:50:30.548Z",
-      "type": "cron",
+      "timestamp": "2026-04-01T04:48:50.548Z",
+      "type": "cron_success",
       "name": "Recipe Collector Daily Multilingual Fetch",
-      "status": "ok",
-      "details": "Completed in 268s"
+      "message": "Sikeres futás, 4.5 perc"
     },
     {
-      "time": "2026-04-01T03:50:02.878Z",
-      "type": "cron",
-      "name": "Családi Események Emlékeztető",
-      "status": "ok",
-      "details": "Completed in 52s, delivered to Telegram"
+      "timestamp": "2026-04-01T04:40:05.181Z",
+      "type": "cron_success",
+      "name": "Recipe Collector Daily Fetch",
+      "message": "Sikeres futás, 6.5 perc"
+    },
+    {
+      "timestamp": "2026-04-01T04:32:17.605Z",
+      "type": "cron_start",
+      "name": "Mission Control Dashboard Auto-Update",
+      "message": "Aktuális futás"
     }
   ],
-  "stats": {
-    "totalSessions": 0,
-    "activeSessions": 0,
-    "completedSessions": 0,
-    "totalCrons": 39,
-    "healthyCrons": 33,
-    "errorCrons": 6,
-    "pendingReminders": 0
+  "summary": {
+    "healthy": 35,
+    "warning": 0,
+    "error": 4,
+    "running": 2,
+    "nextAction": "Javítani kell a LiveSessionModelSwitchError-t: cron-okat glm-5:cloud modellre állítani"
   }
 }
