@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Network, Brain, RefreshCw, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { Brain, RefreshCw, ChevronLeft, ChevronRight, Search, X, FileText, Calendar, Tag } from 'lucide-react';
 
 interface MemoryNode {
   id: number;
@@ -9,14 +9,14 @@ interface MemoryNode {
   category: string;
   keywords: string[];
   created_at: string;
+  content?: string;
 }
 
 interface ObsidianGraph2DProps {
   onSelectMemory?: (memory: MemoryNode) => void;
 }
 
-const CHUNK_SIZE = 20; // Load in chunks
-const DISPLAY_LIMIT = 50; // Max nodes to display
+const ITEMS_PER_PAGE = 20;
 
 // Category colors
 const CATEGORY_COLORS: Record<string, string> = {
@@ -31,48 +31,41 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#9e9e9e'
 };
 
-// Pre-computed spiral positions
-function generatePositions(count: number): { x: number; y: number }[] {
-  const positions: { x: number; y: number }[] = [];
-  const centerX = 400;
-  const centerY = 250;
-  
-  for (let i = 0; i < count; i++) {
-    const angle = i * 2.4; // Golden angle
-    const radius = 30 + Math.sqrt(i) * 25;
-    positions.push({
-      x: centerX + Math.cos(angle) * radius,
-      y: centerY + Math.sin(angle) * radius
-    });
-  }
-  
-  return positions;
-}
-
-const POSITIONS = generatePositions(DISPLAY_LIMIT);
+// Simple cache
+let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
+const CACHE_TTL = 120000;
 
 export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [allMemories, setAllMemories] = useState<MemoryNode[]>([]);
-  const [displayedCount, setDisplayedCount] = useState(CHUNK_SIZE);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch all memories at once
-  const fetchMemories = useCallback(async (pageNum: number) => {
+  const totalPages = Math.ceil(allMemories.length / ITEMS_PER_PAGE);
+  const currentPageMemories = allMemories.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+
+  // Fetch memories
+  const fetchMemories = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:3322/memory/recall?limit=100&offset=${pageNum * 100}`);
+      
+      if (!forceRefresh && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
+        setAllMemories(memoryCache.data);
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch('http://localhost:3322/memory/recall?limit=500&offset=0');
       if (!res.ok) throw new Error('Failed to fetch');
       
       const data = await res.json();
       const items = data.memories || [];
       setAllMemories(items);
-      setDisplayedCount(CHUNK_SIZE);
+      setPage(0);
+      memoryCache = { data: items, timestamp: Date.now() };
       setLoading(false);
     } catch (err) {
       setError('Failed to load memories');
@@ -80,35 +73,37 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     }
   }, []);
 
-  // Initial load
   useEffect(() => {
-    fetchMemories(0);
+    fetchMemories();
   }, [fetchMemories]);
 
-  // Search function
+  // Search
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchQuery('');
       setIsSearching(false);
-      setDisplayedCount(CHUNK_SIZE);
+      fetchMemories(true);
       return;
     }
 
     setIsSearching(true);
     setSearchQuery(query);
+    setLoading(true);
     
     try {
-      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=50`);
+      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=100`);
       if (!res.ok) throw new Error('Search failed');
       
       const data = await res.json();
       const items = data.memories || data.results || [];
       setAllMemories(items);
-      setDisplayedCount(items.length);
+      setPage(0);
+      setLoading(false);
     } catch (err) {
       console.error('Search error:', err);
+      setLoading(false);
     }
-  }, []);
+  }, [fetchMemories]);
 
   // Debounced search
   useEffect(() => {
@@ -117,30 +112,23 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         handleSearch(searchQuery);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [searchQuery, handleSearch]);
 
-  // Filtered and displayed memories
-  const displayedMemories = allMemories.slice(0, displayedCount);
-
-  // Load more handler
-  const handleLoadMore = useCallback(() => {
-    if (loadingMore || displayedCount >= allMemories.length) return;
-    
-    setLoadingMore(true);
-    setTimeout(() => {
-      setDisplayedCount(prev => Math.min(prev + CHUNK_SIZE, allMemories.length));
-      setLoadingMore(false);
-    }, 100);
-  }, [loadingMore, displayedCount, allMemories.length]);
-
-  // Clear search
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     setIsSearching(false);
-    fetchMemories(0);
+    fetchMemories(true);
   }, [fetchMemories]);
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
 
   if (loading) {
     return (
@@ -168,7 +156,7 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         gap: '12px'
       }}>
         <span style={{ color: 'var(--negative)' }}>{error}</span>
-        <button onClick={() => fetchMemories(0)} style={{
+        <button onClick={() => fetchMemories(true)} style={{
           padding: '8px 16px',
           borderRadius: '6px',
           background: 'var(--accent)',
@@ -201,12 +189,12 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
         gap: '12px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Network size={16} style={{ color: 'var(--accent)' }} />
+          <Brain size={16} style={{ color: 'var(--accent)' }} />
           <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-            Memory Graph
+            Memory List
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-            {isSearching ? `${allMemories.length} found` : `${displayedCount}/${allMemories.length}`}
+            {allMemories.length} memories
           </span>
         </div>
 
@@ -254,116 +242,144 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '4px' }}>
-          <button onClick={() => fetchMemories(0)} title="Refresh"
-            style={{
-              padding: '6px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}>
-            <RefreshCw size={12} />
-          </button>
-        </div>
+        <button onClick={() => fetchMemories(true)} title="Refresh"
+          style={{
+            padding: '6px',
+            borderRadius: '4px',
+            background: 'var(--bg)',
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border)',
+            cursor: 'pointer'
+          }}>
+          <RefreshCw size={12} />
+        </button>
       </div>
 
-      {/* Graph */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        {/* Center node */}
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          background: 'var(--accent)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--bg)',
-          fontSize: '10px',
-          fontWeight: 600,
-          zIndex: 10
-        }}>
-          Brain
-        </div>
-
-        {/* Connection lines */}
-        <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-          {displayedMemories.map((node, i) => {
-            const pos = POSITIONS[i] || { x: 400, y: 250 };
-            return (
-              <line
-                key={node.id}
-                x1="50%"
-                y1="50%"
-                x2={`${(pos.x / 800) * 100}%`}
-                y2={`${(pos.y / 500) * 100}%`}
-                stroke={CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default']}
-                strokeWidth="1"
-                strokeOpacity="0.2"
-              />
-            );
-          })}
-        </svg>
-
-        {/* Memory nodes */}
-        {displayedMemories.map((node, i) => {
-          const pos = POSITIONS[i] || { x: 400, y: 250 };
-          return (
+      {/* Memory List */}
+      <div style={{ flex: 1, overflow: 'auto', padding: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {currentPageMemories.map((memory) => (
             <div
-              key={node.id}
+              key={memory.id}
+              onClick={() => onSelectMemory?.(memory)}
               style={{
-                position: 'absolute',
-                left: `${(pos.x / 800) * 100}%`,
-                top: `${(pos.y / 500) * 100}%`,
-                transform: 'translate(-50%, -50%)',
+                padding: '12px',
+                borderRadius: '8px',
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
                 cursor: 'pointer',
-                transition: 'transform 0.2s ease'
+                transition: 'all 0.15s ease'
               }}
-              onClick={() => onSelectMemory?.(node)}
-              title={node.title}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                e.currentTarget.style.background = 'var(--surface)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.background = 'var(--bg)';
+              }}
             >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default']
+                }} />
+                <span style={{
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {memory.title}
+                </span>
+                <span style={{
+                  fontSize: '10px',
+                  color: 'var(--text-muted)',
+                  background: 'var(--surface)',
+                  padding: '2px 6px',
+                  borderRadius: '4px'
+                }}>
+                  {memory.category}
+                </span>
+              </div>
+              
               <div style={{
-                width: '10px',
-                height: '10px',
-                borderRadius: '50%',
-                background: CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'],
-                boxShadow: `0 0 6px ${CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default']}60`
-              }} />
+                fontSize: '11px',
+                color: 'var(--text-secondary)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                marginBottom: '6px'
+              }}>
+                {memory.content?.slice(0, 100)}...
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '10px', color: 'var(--text-muted)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Calendar size={10} />
+                  {formatDate(memory.created_at)}
+                </div>
+                {memory.keywords && memory.keywords.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Tag size={10} />
+                    {memory.keywords.slice(0, 3).join(', ')}
+                  </div>
+                )}
+              </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
-      {/* Load More Button */}
-      {!isSearching && displayedCount < allMemories.length && (
+      {/* Pagination */}
+      {totalPages > 1 && (
         <div style={{
           display: 'flex',
           justifyContent: 'center',
+          alignItems: 'center',
+          gap: '12px',
           padding: '12px',
           borderTop: '1px solid var(--border)'
         }}>
           <button
-            onClick={handleLoadMore}
-            disabled={loadingMore}
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
             style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              background: 'var(--accent)',
-              color: 'var(--bg)',
+              padding: '6px 12px',
+              borderRadius: '4px',
+              background: page === 0 ? 'var(--bg)' : 'var(--accent)',
+              color: page === 0 ? 'var(--text-muted)' : 'var(--bg)',
               border: 'none',
-              cursor: loadingMore ? 'wait' : 'pointer',
-              fontSize: '12px',
-              fontWeight: 500,
-              opacity: loadingMore ? 0.7 : 1
+              cursor: page === 0 ? 'not-allowed' : 'pointer',
+              fontSize: '12px'
             }}
           >
-            {loadingMore ? 'Loading...' : `Load More (${allMemories.length - displayedCount} remaining)`}
+            <ChevronLeft size={14} />
+          </button>
+          
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            {page + 1} / {totalPages}
+          </span>
+          
+          <button
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '4px',
+              background: page >= totalPages - 1 ? 'var(--bg)' : 'var(--accent)',
+              color: page >= totalPages - 1 ? 'var(--text-muted)' : 'var(--bg)',
+              border: 'none',
+              cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            <ChevronRight size={14} />
           </button>
         </div>
       )}
@@ -371,12 +387,13 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       {/* Legend */}
       <div style={{
         display: 'flex',
-        gap: '12px',
+        flexWrap: 'wrap',
+        gap: '8px',
         padding: '8px 16px',
         borderTop: '1px solid var(--border)',
         background: 'var(--bg)'
       }}>
-        {Object.entries(CATEGORY_COLORS).slice(0, 6).map(([cat, color]) => (
+        {Object.entries(CATEGORY_COLORS).slice(0, 8).map(([cat, color]) => (
           <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
             <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cat}</span>

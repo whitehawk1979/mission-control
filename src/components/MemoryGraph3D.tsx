@@ -1,9 +1,7 @@
 'use client';
 
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Text } from '@react-three/drei';
-import { Suspense, useMemo, memo, useState, useEffect, useCallback, useRef } from 'react';
-import { Network, Brain, RefreshCw, Search, X } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Network, Brain, RefreshCw, Search, X, Calendar, Tag } from 'lucide-react';
 
 interface MemoryNode {
   id: number;
@@ -11,14 +9,14 @@ interface MemoryNode {
   category: string;
   keywords: string[];
   created_at: string;
+  content?: string;
 }
 
 interface MemoryGraph3DProps {
   onSelectMemory?: (memory: MemoryNode) => void;
 }
 
-const CHUNK_SIZE = 20;
-const DISPLAY_LIMIT = 100;
+const ITEMS_PER_PAGE = 20;
 
 // Category colors
 const CATEGORY_COLORS: Record<string, string> = {
@@ -33,137 +31,41 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#9e9e9e'
 };
 
-// Pre-computed 3D positions using sphere distribution
-function generate3DPositions(count: number): [number, number, number][] {
-  const positions: [number, number, number][] = [];
-  const goldenRatio = (1 + Math.sqrt(5)) / 2;
-  
-  for (let i = 0; i < count; i++) {
-    const theta = 2 * Math.PI * i / goldenRatio;
-    const phi = Math.acos(1 - 2 * (i + 0.5) / count);
-    const radius = 5 + Math.sqrt(i) * 0.5;
-    
-    positions.push([
-      radius * Math.sin(phi) * Math.cos(theta),
-      radius * Math.sin(phi) * Math.sin(theta),
-      radius * Math.cos(phi)
-    ]);
-  }
-  
-  return positions;
-}
-
-const POSITIONS_3D = generate3DPositions(DISPLAY_LIMIT);
-
-// Memoized 3D node
-const MemoryNode3D = memo(({ 
-  node, 
-  position,
-  color 
-}: { 
-  node: MemoryNode;
-  position: [number, number, number];
-  color: string;
-}) => {
-  return (
-    <group position={position}>
-      <mesh>
-        <sphereGeometry args={[0.15, 8, 8]} />
-        <meshStandardMaterial 
-          color={color} 
-          emissive={color}
-          emissiveIntensity={0.3}
-        />
-      </mesh>
-      <Text
-        position={[0, 0.25, 0]}
-        fontSize={0.08}
-        color="#fff"
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={1}
-      >
-        {node.title.length > 15 ? node.title.slice(0, 14) + '…' : node.title}
-      </Text>
-    </group>
-  );
-});
-
-MemoryNode3D.displayName = 'MemoryNode3D';
-
-// 3D Scene
-function Scene3D({ nodes }: { nodes: MemoryNode[] }) {
-  return (
-    <>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={0.6} />
-      
-      {/* Center brain node */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[0.4, 16, 16]} />
-        <meshStandardMaterial 
-          color="#4a90d9" 
-          emissive="#4a90d9"
-          emissiveIntensity={0.5}
-        />
-      </mesh>
-      <Text
-        position={[0, 0.6, 0]}
-        fontSize={0.15}
-        color="#fff"
-        anchorX="center"
-      >
-        Brain
-      </Text>
-
-      {/* Memory nodes */}
-      {nodes.slice(0, POSITIONS_3D.length).map((node, i) => {
-        const pos = POSITIONS_3D[i];
-        const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
-        
-        return (
-          <MemoryNode3D
-            key={node.id}
-            node={node}
-            position={pos}
-            color={color}
-          />
-        );
-      })}
-      
-      <OrbitControls 
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        autoRotate={false}
-        maxDistance={20}
-        minDistance={2}
-      />
-    </>
-  );
-}
+// Simple cache
+let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
+const CACHE_TTL = 120000;
 
 export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
   const [allMemories, setAllMemories] = useState<MemoryNode[]>([]);
-  const [displayedCount, setDisplayedCount] = useState(CHUNK_SIZE);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const totalPages = Math.ceil(allMemories.length / ITEMS_PER_PAGE);
+  const currentPageMemories = allMemories.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+
   // Fetch memories
-  const fetchMemories = useCallback(async () => {
+  const fetchMemories = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:3322/memory/recall?limit=100&offset=0');
+      
+      if (!forceRefresh && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
+        setAllMemories(memoryCache.data);
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch('http://localhost:3322/memory/recall?limit=500&offset=0');
       if (!res.ok) throw new Error('Failed to fetch');
       
       const data = await res.json();
       const items = data.memories || [];
       setAllMemories(items);
-      setDisplayedCount(CHUNK_SIZE);
+      setPage(0);
+      memoryCache = { data: items, timestamp: Date.now() };
       setLoading(false);
     } catch (err) {
       setError('Failed to load memories');
@@ -180,25 +82,28 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     if (!query.trim()) {
       setSearchQuery('');
       setIsSearching(false);
-      setDisplayedCount(CHUNK_SIZE);
+      fetchMemories(true);
       return;
     }
 
     setIsSearching(true);
     setSearchQuery(query);
+    setLoading(true);
     
     try {
-      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=50`);
+      const res = await fetch(`http://localhost:3322/memory/search?q=${encodeURIComponent(query)}&limit=100`);
       if (!res.ok) throw new Error('Search failed');
       
       const data = await res.json();
       const items = data.memories || data.results || [];
       setAllMemories(items);
-      setDisplayedCount(items.length);
+      setPage(0);
+      setLoading(false);
     } catch (err) {
       console.error('Search error:', err);
+      setLoading(false);
     }
-  }, []);
+  }, [fetchMemories]);
 
   // Debounced search
   useEffect(() => {
@@ -207,27 +112,23 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
         handleSearch(searchQuery);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [searchQuery, handleSearch]);
-
-  const displayedMemories = allMemories.slice(0, displayedCount);
-
-  const handleLoadMore = useCallback(() => {
-    if (loadingMore || displayedCount >= allMemories.length) return;
-    
-    setLoadingMore(true);
-    setTimeout(() => {
-      setDisplayedCount(prev => Math.min(prev + CHUNK_SIZE, allMemories.length));
-      setLoadingMore(false);
-    }, 100);
-  }, [loadingMore, displayedCount, allMemories.length]);
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     setIsSearching(false);
-    fetchMemories();
+    fetchMemories(true);
   }, [fetchMemories]);
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
 
   if (loading) {
     return (
@@ -239,7 +140,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
         gap: '12px'
       }}>
         <Brain size={24} style={{ color: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
-        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading 3D graph...</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading memories...</span>
       </div>
     );
   }
@@ -255,7 +156,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
         gap: '12px'
       }}>
         <span style={{ color: 'var(--negative)' }}>{error}</span>
-        <button onClick={fetchMemories} style={{
+        <button onClick={() => fetchMemories(true)} style={{
           padding: '8px 16px',
           borderRadius: '6px',
           background: 'var(--accent)',
@@ -290,10 +191,10 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Network size={16} style={{ color: 'var(--accent)' }} />
           <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-            3D Memory Graph
+            Memory Explorer
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-            {isSearching ? `${allMemories.length} found` : `${displayedCount}/${allMemories.length}`}
+            {allMemories.length} memories
           </span>
         </div>
 
@@ -341,7 +242,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
           </div>
         </div>
 
-        <button onClick={fetchMemories} title="Refresh"
+        <button onClick={() => fetchMemories(true)} title="Refresh"
           style={{
             padding: '6px',
             borderRadius: '4px',
@@ -354,58 +255,164 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
         </button>
       </div>
 
-      {/* 3D Canvas */}
-      <div style={{ flex: 1 }}>
-        <Canvas camera={{ position: [8, 8, 8], fov: 50 }}>
-          <Suspense fallback={null}>
-            <Scene3D nodes={displayedMemories} />
-          </Suspense>
-        </Canvas>
+      {/* Category Filter */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '8px',
+        padding: '12px 16px',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        {Object.entries(CATEGORY_COLORS).map(([cat, color]) => (
+          <button
+            key={cat}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '12px',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+              fontSize: '11px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: color }} />
+            {cat}
+          </button>
+        ))}
       </div>
 
-      {/* Load More */}
-      {!isSearching && displayedCount < allMemories.length && (
+      {/* Memory Cards Grid */}
+      <div style={{ flex: 1, overflow: 'auto', padding: '16px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '12px'
+        }}>
+          {currentPageMemories.map((memory) => (
+            <div
+              key={memory.id}
+              onClick={() => onSelectMemory?.(memory)}
+              style={{
+                padding: '14px',
+                borderRadius: '10px',
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default'];
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <div style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  background: CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default'],
+                  boxShadow: `0 0 8px ${CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default']}60`
+                }} />
+                <span style={{
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {memory.title}
+                </span>
+              </div>
+              
+              <div style={{
+                fontSize: '11px',
+                color: 'var(--text-secondary)',
+                lineHeight: '1.4',
+                marginBottom: '10px',
+                height: '42px',
+                overflow: 'hidden'
+              }}>
+                {memory.content?.slice(0, 150)}...
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Calendar size={10} />
+                  {formatDate(memory.created_at)}
+                </div>
+                <div style={{
+                  background: 'var(--surface)',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  color: CATEGORY_COLORS[memory.category] || CATEGORY_COLORS['default']
+                }}>
+                  {memory.category}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
         <div style={{
           display: 'flex',
           justifyContent: 'center',
+          alignItems: 'center',
+          gap: '12px',
           padding: '12px',
           borderTop: '1px solid var(--border)'
         }}>
           <button
-            onClick={handleLoadMore}
-            disabled={loadingMore}
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
             style={{
               padding: '8px 16px',
               borderRadius: '6px',
-              background: 'var(--accent)',
-              color: 'var(--bg)',
+              background: page === 0 ? 'var(--bg)' : 'var(--accent)',
+              color: page === 0 ? 'var(--text-muted)' : 'var(--bg)',
               border: 'none',
-              cursor: loadingMore ? 'wait' : 'pointer',
-              fontSize: '12px',
-              fontWeight: 500,
-              opacity: loadingMore ? 0.7 : 1
+              cursor: page === 0 ? 'not-allowed' : 'pointer',
+              fontSize: '12px'
             }}
           >
-            {loadingMore ? 'Loading...' : `Load More (${allMemories.length - displayedCount} remaining)`}
+            Previous
+          </button>
+          
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            Page {page + 1} of {totalPages}
+          </span>
+          
+          <button
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: page >= totalPages - 1 ? 'var(--bg)' : 'var(--accent)',
+              color: page >= totalPages - 1 ? 'var(--text-muted)' : 'var(--bg)',
+              border: 'none',
+              cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            Next
           </button>
         </div>
       )}
-
-      {/* Legend */}
-      <div style={{
-        display: 'flex',
-        gap: '12px',
-        padding: '8px 16px',
-        borderTop: '1px solid var(--border)',
-        background: 'var(--bg)'
-      }}>
-        {Object.entries(CATEGORY_COLORS).slice(0, 6).map(([cat, color]) => (
-          <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
-            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cat}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
