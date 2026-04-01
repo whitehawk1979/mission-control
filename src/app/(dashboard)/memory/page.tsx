@@ -56,6 +56,69 @@ interface Workspace {
 }
 
 export default function MemoryPage() {
+  // Mobile styles - injected once
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @media (max-width: 768px) {
+        /* Mobile tab buttons */
+        [data-mobile-tabs] button {
+          padding: 6px 12px !important;
+          font-size: 12px !important;
+        }
+        
+        /* Mobile sidebar toggle */
+        [data-mobile-menu] {
+          display: flex !important;
+        }
+        
+        /* Mobile sidebar overlay */
+        .sidebar-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 999;
+        }
+        
+        /* Mobile file tree */
+        [data-file-tree] {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        
+        /* Mobile editor */
+        [data-editor] {
+          padding: 12px !important;
+        }
+        
+        /* Mobile toolbar */
+        [data-toolbar] {
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        /* Mobile view toggle */
+        [data-view-toggle] {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        /* Extra small screens */
+        [data-toolbar] > div:first-child {
+          width: 100%;
+          justify-content: center;
+        }
+        
+        [data-toolbar] button[title="Refresh"] {
+          display: none;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(null);
   const [files, setFiles] = useState<FileNode[]>([]);
@@ -66,6 +129,7 @@ export default function MemoryPage() {
   const [tabMode, setTabMode] = useState<TabMode>("files");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const hasUnsavedChanges = content !== originalContent;
 
@@ -163,27 +227,57 @@ export default function MemoryPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Page header */}
-      <div style={{ padding: "24px 24px 16px 24px", flexShrink: 0 }}>
-        <h1
+      {/* Mobile header */}
+      <div style={{ 
+        padding: "16px", 
+        flexShrink: 0,
+        borderBottom: "1px solid var(--border)",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px"
+      }}>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
           style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "24px",
-            fontWeight: 700,
-            letterSpacing: "-1px",
-            color: "var(--text-primary)",
-            marginBottom: "4px",
+            padding: "8px",
+            borderRadius: "8px",
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            cursor: "pointer",
+            display: "none"
           }}
+          data-mobile-menu="true"
         >
-          Memory Browser
-        </h1>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--text-secondary)" }}>
-          View and edit agent memory files with graph visualization
-        </p>
+          ☰
+        </button>
+        <div style={{ flex: 1 }}>
+          <h1
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(18px, 4vw, 24px)",
+              fontWeight: 700,
+              letterSpacing: "-0.5px",
+              color: "var(--text-primary)",
+              marginBottom: "2px",
+            }}
+          >
+            Memory
+          </h1>
+          <p style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--text-secondary)" }}>
+            Files & Graph
+          </p>
+        </div>
       </div>
 
-      {/* Tab bar */}
-      <div style={{ display: "flex", gap: "8px", padding: "0 24px 16px" }}>
+      {/* Tab bar - Scrollable on mobile */}
+      <div style={{ 
+        display: "flex", 
+        gap: "8px", 
+        padding: "0 16px 12px",
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none"
+      }}>
         <button
           onClick={() => setTabMode("files")}
           style={{
@@ -265,7 +359,7 @@ export default function MemoryPage() {
             borderTop: "1px solid var(--border)",
           }}
         >
-          {/* LEFT SIDEBAR: Workspace list */}
+          {/* LEFT SIDEBAR: Workspace list - Mobile friendly */}
           <aside
             style={{
               width: "220px",
@@ -274,7 +368,16 @@ export default function MemoryPage() {
               overflowY: "auto",
               padding: "16px 0",
               backgroundColor: "var(--surface, var(--card))",
-            }}
+              "@media (maxWidth: 768px)": {
+                position: "fixed",
+                left: sidebarOpen ? 0 : "-220px",
+                top: 0,
+                bottom: 0,
+                width: "220px",
+                zIndex: 1000,
+                transition: "left 0.3s ease"
+              }
+            } as React.CSSProperties}
           >
             <p
               style={{
@@ -349,8 +452,14 @@ export default function MemoryPage() {
             })}
           </aside>
 
-          {/* RIGHT PANEL */}
-          <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {/* RIGHT PANEL - Mobile friendly */}
+          <main style={{ 
+            flex: 1, 
+            display: "flex", 
+            flexDirection: "column", 
+            overflow: "hidden",
+            minWidth: 0
+          }}>
             {selectedWorkspace && selectedWorkspaceData ? (
               <>
                 {/* Toolbar bar */}

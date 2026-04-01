@@ -255,6 +255,70 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     canvas.style.cursor = foundNode ? 'pointer' : 'default';
   }, [zoom]);
 
+  // Touch support for mobile
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length !== 1) return;
+    
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    let foundNode: number | null = null;
+    for (const [id, pos] of positionsRef.current.entries()) {
+      const nodeX = centerX + (pos.x - 400) * zoom;
+      const nodeY = centerY + (pos.y - 250) * zoom;
+      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
+      if (dist < 25 * zoom) { // Larger touch target
+        foundNode = id;
+        break;
+      }
+    }
+    
+    setHoveredNode(foundNode);
+  }, [zoom]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length !== 1) return;
+    
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    let foundNode: number | null = null;
+    for (const [id, pos] of positionsRef.current.entries()) {
+      const nodeX = centerX + (pos.x - 400) * zoom;
+      const nodeY = centerY + (pos.y - 250) * zoom;
+      const dist = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
+      if (dist < 30 * zoom) {
+        foundNode = id;
+        break;
+      }
+    }
+    
+    if (foundNode !== null) {
+      const node = allMemories.find(n => n.id === foundNode);
+      if (node && onSelectMemory) {
+        onSelectMemory(node);
+      }
+    }
+  }, [zoom, allMemories, onSelectMemory]);
+
   const handleClick = useCallback(() => {
     if (hoveredNode !== null) {
       const node = allMemories.find(n => n.id === hoveredNode);
@@ -313,16 +377,17 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       borderRadius: '12px',
       overflow: 'hidden'
     }}>
-      {/* Header */}
+      {/* Header - Mobile friendly */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '12px 16px',
-        borderBottom: '1px solid var(--border)',
-        gap: '12px'
+        flexWrap: 'wrap',
+        padding: '12px',
+        gap: '8px',
+        borderBottom: '1px solid var(--border)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 auto', minWidth: '150px' }}>
           <Network size={16} style={{ color: 'var(--accent)' }} />
           <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
             Memory Graph
@@ -332,7 +397,7 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '250px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 auto', maxWidth: '250px', minWidth: '120px' }}>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
             <Search size={14} style={{ position: 'absolute', left: '8px', color: 'var(--text-muted)' }} />
             <input
@@ -342,17 +407,17 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
                 width: '100%',
-                padding: '6px 8px 6px 28px',
-                borderRadius: '4px',
+                padding: '8px 8px 8px 28px',
+                borderRadius: '6px',
                 border: '1px solid var(--border)',
                 background: 'var(--bg)',
                 color: 'var(--text-primary)',
-                fontSize: '12px'
+                fontSize: '13px'
               }}
             />
             {searchQuery && (
               <button onClick={handleClearSearch} style={{
-                position: 'absolute', right: '4px', padding: '2px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)'
+                position: 'absolute', right: '4px', padding: '4px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)'
               }}>
                 <X size={12} />
               </button>
@@ -360,43 +425,46 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <button onClick={() => setZoom(z => Math.max(0.5, z - 0.1))} title="Zoom out" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+          <button onClick={() => setZoom(z => Math.max(0.5, z - 0.1))} title="Zoom out" style={{ padding: '6px', borderRadius: '6px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <ZoomOut size={14} />
           </button>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '40px', textAlign: 'center' }}>{Math.round(zoom * 100)}%</span>
-          <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} title="Zoom in" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
+          <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} title="Zoom in" style={{ padding: '6px', borderRadius: '6px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <ZoomIn size={14} />
           </button>
-          <button onClick={() => setZoom(1)} title="Reset zoom" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
+          <button onClick={() => setZoom(1)} title="Reset zoom" style={{ padding: '6px', borderRadius: '6px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <Maximize2 size={14} />
           </button>
-          <button onClick={() => fetchMemories(true)} title="Refresh" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
+          <button onClick={() => fetchMemories(true)} title="Refresh" style={{ padding: '6px', borderRadius: '6px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <RefreshCw size={14} />
           </button>
         </div>
       </div>
 
       {/* Canvas */}
-      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden' }}>
+      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden', touchAction: 'none' }}>
         <canvas
           ref={canvasRef}
           onMouseMove={handleMouseMove}
           onClick={handleClick}
+          onTouchMove={handleTouchMove}
+          onTouchStart={handleTouchStart}
           style={{ 
             display: 'block',
             transform: 'translateZ(0)',
-            willChange: 'transform'
+            willChange: 'transform',
+            touchAction: 'none'
           }}
         />
       </div>
 
-      {/* Legend */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+      {/* Legend - Mobile friendly */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '8px 12px', borderTop: '1px solid var(--border)', background: 'var(--bg)', overflowX: 'auto' }}>
         {Object.entries(CATEGORY_COLORS).slice(0, 8).map(([cat, color]) => (
-          <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
-            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cat}</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{cat}</span>
           </div>
         ))}
       </div>
