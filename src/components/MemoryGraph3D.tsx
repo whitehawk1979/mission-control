@@ -18,7 +18,6 @@ interface MemoryGraph3DProps {
 
 const MAX_NODES = 80;
 
-// Category colors
 const CATEGORY_COLORS: Record<string, string> = {
   'system': '#4a90d9',
   'family': '#e91e63',
@@ -31,11 +30,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#9e9e9e'
 };
 
-// Simple cache
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
 const CACHE_TTL = 120000;
 
-// 3D sphere positions
 function compute3DPositions(nodes: MemoryNode[]): Map<number, { x: number; y: number; z: number }> {
   const positions = new Map<number, { x: number; y: number; z: number }>();
   const goldenRatio = (1 + Math.sqrt(5)) / 2;
@@ -66,9 +63,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const positionsRef = useRef<Map<number, { x: number; y: number; z: number }>>(new Map());
-  const animationRef = useRef<number | null>(null);
 
-  // Fetch memories
   const fetchMemories = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
@@ -97,7 +92,6 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     fetchMemories();
   }, [fetchMemories]);
 
-  // Search
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchQuery('');
@@ -136,29 +130,23 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     fetchMemories(true);
   }, [fetchMemories]);
 
-  // Compute positions
   useEffect(() => {
     if (allMemories.length > 0) {
       positionsRef.current = compute3DPositions(allMemories);
     }
   }, [allMemories]);
 
-  // 3D to 2D projection
   const project3D = useCallback((x: number, y: number, z: number, centerX: number, centerY: number) => {
     const cosY = Math.cos(rotationY);
     const sinY = Math.sin(rotationY);
     const cosX = Math.cos(rotationX);
     const sinX = Math.sin(rotationX);
     
-    // Rotate around Y axis
     const x1 = x * cosY - z * sinY;
     const z1 = x * sinY + z * cosY;
-    
-    // Rotate around X axis
     const y1 = y * cosX - z1 * sinX;
     const z2 = y * sinX + z1 * cosX;
     
-    // Perspective projection
     const scale = 500 / (500 + z2);
     
     return {
@@ -168,13 +156,15 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     };
   }, [rotationY, rotationX]);
 
-  // Draw on canvas
-  const draw = useCallback(() => {
+  useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', {
+      alpha: false,
+      desynchronized: true
+    });
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
@@ -216,7 +206,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     
     nodesWithDepth.sort((a, b) => b.z - a.z);
     
-    // Draw connections first
+    // Draw connections
     nodesWithDepth.forEach(({ node, pos }) => {
       const projected = project3D(pos.x, pos.y, pos.z, centerX, centerY);
       const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS['default'];
@@ -246,7 +236,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
       ctx.globalAlpha = 1;
       
       if (isHovered) {
-        ctx.fillStyle = 'var(--text-primary)';
+        ctx.fillStyle = '#fff';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(node.title.slice(0, 20), projected.x, projected.y - 12);
@@ -254,12 +244,6 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     });
   }, [allMemories, rotationY, rotationX, hoveredNode, project3D]);
 
-  // Animation loop
-  useEffect(() => {
-    draw();
-  }, [draw]);
-
-  // Mouse handlers
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -285,7 +269,7 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
     canvas.style.cursor = foundNode ? 'pointer' : 'default';
   }, [project3D]);
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleClick = useCallback(() => {
     if (hoveredNode !== null) {
       const node = allMemories.find(n => n.id === hoveredNode);
       if (node && onSelectMemory) {
@@ -372,14 +356,8 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
           </span>
         </div>
 
-        {/* Search */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '250px' }}>
-          <div style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            flex: 1
-          }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
             <Search size={14} style={{ position: 'absolute', left: '8px', color: 'var(--text-muted)' }} />
             <input
               type="text"
@@ -397,80 +375,26 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
               }}
             />
             {searchQuery && (
-              <button
-                onClick={handleClearSearch}
-                style={{
-                  position: 'absolute',
-                  right: '4px',
-                  padding: '2px',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--text-muted)'
-                }}
-              >
+              <button onClick={handleClearSearch} style={{
+                position: 'absolute', right: '4px', padding: '2px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)'
+              }}>
                 <X size={12} />
               </button>
             )}
           </div>
         </div>
 
-        {/* Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <button
-            onClick={() => setRotationY(r => r - 0.3)}
-            title="Rotate left"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={() => setRotationY(r => r - 0.3)} title="Rotate left" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <ZoomOut size={14} />
           </button>
-          <button
-            onClick={() => setRotationY(r => r + 0.3)}
-            title="Rotate right"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={() => setRotationY(r => r + 0.3)} title="Rotate right" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <ZoomIn size={14} />
           </button>
-          <button
-            onClick={() => { setRotationY(0); setRotationX(0); }}
-            title="Reset view"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={() => { setRotationY(0); setRotationX(0); }} title="Reset view" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <RotateCcw size={14} />
           </button>
-          <button
-            onClick={() => fetchMemories(true)}
-            title="Refresh"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={() => fetchMemories(true)} title="Refresh" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <RefreshCw size={14} />
           </button>
         </div>
@@ -483,19 +407,16 @@ export default function MemoryGraph3D({ onSelectMemory }: MemoryGraph3DProps) {
           onMouseMove={handleMouseMove}
           onClick={handleClick}
           onMouseDown={handleDrag}
-          style={{ display: 'block' }}
+          style={{ 
+            display: 'block',
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}
         />
       </div>
 
       {/* Legend */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '8px',
-        padding: '8px 16px',
-        borderTop: '1px solid var(--border)',
-        background: 'var(--bg)'
-      }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
         {Object.entries(CATEGORY_COLORS).slice(0, 8).map(([cat, color]) => (
           <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />

@@ -16,10 +16,8 @@ interface ObsidianGraph2DProps {
   onSelectMemory?: (memory: MemoryNode) => void;
 }
 
-const ITEMS_PER_PAGE = 30;
-const MAX_NODES = 100; // Hard limit for performance
+const MAX_NODES = 100;
 
-// Category colors
 const CATEGORY_COLORS: Record<string, string> = {
   'system': '#4a90d9',
   'family': '#e91e63',
@@ -32,17 +30,14 @@ const CATEGORY_COLORS: Record<string, string> = {
   'default': '#9e9e9e'
 };
 
-// Simple cache
 let memoryCache: { data: MemoryNode[]; timestamp: number } | null = null;
 const CACHE_TTL = 120000;
 
-// Pre-computed positions using force-directed layout approximation
 function computePositions(nodes: MemoryNode[]): Map<number, { x: number; y: number }> {
   const positions = new Map<number, { x: number; y: number }>();
   const centerX = 400;
   const centerY = 250;
   
-  // Group by category for clustering
   const categoryGroups: Record<string, MemoryNode[]> = {};
   nodes.forEach(node => {
     const cat = node.category || 'default';
@@ -50,7 +45,6 @@ function computePositions(nodes: MemoryNode[]): Map<number, { x: number; y: numb
     categoryGroups[cat].push(node);
   });
   
-  // Position each category group in a circular pattern
   const categories = Object.keys(categoryGroups);
   const categoryAngle = (2 * Math.PI) / Math.max(categories.length, 1);
   
@@ -61,7 +55,6 @@ function computePositions(nodes: MemoryNode[]): Map<number, { x: number; y: numb
     const groupCenterX = centerX + Math.cos(groupAngle) * groupRadius;
     const groupCenterY = centerY + Math.sin(groupAngle) * groupRadius;
     
-    // Position nodes within group
     groupNodes.forEach((node, nodeIndex) => {
       const nodeAngle = (nodeIndex / groupNodes.length) * 2 * Math.PI;
       const nodeRadius = 20 + Math.sqrt(nodeIndex) * 8;
@@ -80,14 +73,12 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const positionsRef = useRef<Map<number, { x: number; y: number }>>(new Map());
 
-  // Fetch memories
   const fetchMemories = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
@@ -116,16 +107,13 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     fetchMemories();
   }, [fetchMemories]);
 
-  // Search
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchQuery('');
-      setIsSearching(false);
       fetchMemories(true);
       return;
     }
 
-    setIsSearching(true);
     setSearchQuery(query);
     setLoading(true);
     
@@ -143,7 +131,6 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     }
   }, [fetchMemories]);
 
-  // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery) {
@@ -155,24 +142,25 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
-    setIsSearching(false);
     fetchMemories(true);
   }, [fetchMemories]);
 
-  // Compute positions when memories change
   useEffect(() => {
     if (allMemories.length > 0) {
       positionsRef.current = computePositions(allMemories);
     }
   }, [allMemories]);
 
-  // Draw on canvas
+  // Draw on canvas with GPU acceleration
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { 
+      alpha: false,
+      desynchronized: true 
+    });
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
@@ -229,18 +217,17 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       
       // Draw label on hover
       if (isHovered) {
-        ctx.fillStyle = 'var(--text-primary)';
+        ctx.fillStyle = '#fff';
         ctx.font = `${11 * zoom}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillText(node.title.slice(0, 25) + (node.title.length > 25 ? '…' : ''), x, y - 15 * zoom);
-        ctx.fillStyle = 'var(--text-muted)';
+        ctx.fillStyle = '#888';
         ctx.font = `${9 * zoom}px sans-serif`;
         ctx.fillText(node.category, x, y - 5 * zoom);
       }
     });
   }, [allMemories, zoom, hoveredNode]);
 
-  // Handle mouse move for hover
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -268,8 +255,7 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
     canvas.style.cursor = foundNode ? 'pointer' : 'default';
   }, [zoom]);
 
-  // Handle click
-  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleClick = useCallback(() => {
     if (hoveredNode !== null) {
       const node = allMemories.find(n => n.id === hoveredNode);
       if (node && onSelectMemory) {
@@ -346,14 +332,8 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           </span>
         </div>
 
-        {/* Search */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '250px' }}>
-          <div style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            flex: 1
-          }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
             <Search size={14} style={{ position: 'absolute', left: '8px', color: 'var(--text-muted)' }} />
             <input
               type="text"
@@ -371,83 +351,27 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
               }}
             />
             {searchQuery && (
-              <button
-                onClick={handleClearSearch}
-                style={{
-                  position: 'absolute',
-                  right: '4px',
-                  padding: '2px',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--text-muted)'
-                }}
-              >
+              <button onClick={handleClearSearch} style={{
+                position: 'absolute', right: '4px', padding: '2px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)'
+              }}>
                 <X size={12} />
               </button>
             )}
           </div>
         </div>
 
-        {/* Zoom controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <button
-            onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
-            title="Zoom out"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={() => setZoom(z => Math.max(0.5, z - 0.1))} title="Zoom out" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <ZoomOut size={14} />
           </button>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '40px', textAlign: 'center' }}>
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            onClick={() => setZoom(z => Math.min(2, z + 0.1))}
-            title="Zoom in"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '40px', textAlign: 'center' }}>{Math.round(zoom * 100)}%</span>
+          <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} title="Zoom in" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <ZoomIn size={14} />
           </button>
-          <button
-            onClick={() => setZoom(1)}
-            title="Reset zoom"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={() => setZoom(1)} title="Reset zoom" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <Maximize2 size={14} />
           </button>
-          <button
-            onClick={() => fetchMemories(true)}
-            title="Refresh"
-            style={{
-              padding: '4px',
-              borderRadius: '4px',
-              background: 'var(--bg)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={() => fetchMemories(true)} title="Refresh" style={{ padding: '4px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <RefreshCw size={14} />
           </button>
         </div>
@@ -459,19 +383,16 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
           ref={canvasRef}
           onMouseMove={handleMouseMove}
           onClick={handleClick}
-          style={{ display: 'block' }}
+          style={{ 
+            display: 'block',
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}
         />
       </div>
 
       {/* Legend */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '8px',
-        padding: '8px 16px',
-        borderTop: '1px solid var(--border)',
-        background: 'var(--bg)'
-      }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
         {Object.entries(CATEGORY_COLORS).slice(0, 8).map(([cat, color]) => (
           <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
