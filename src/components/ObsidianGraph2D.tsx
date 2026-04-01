@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Network, Brain, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getMemoryCache, setMemoryCache, debounce } from '@/lib/cache';
 
 interface MemoryNode {
   id: number;
@@ -95,14 +96,30 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
   const [page, setPage] = useState(0);
 
-  // Fetch memories with pagination
-  const fetchMemories = useCallback(async () => {
+  // Fetch memories with pagination and caching
+  const fetchMemories = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
+      
+      // Check cache first
+      if (!forceRefresh) {
+        const cached = getMemoryCache();
+        if (cached) {
+          setMemories(cached);
+          setLoading(false);
+          return;
+        }
+      }
+      
       const res = await fetch(`http://localhost:3322/memory/recall?limit=${ITEMS_PER_PAGE}&offset=${page * ITEMS_PER_PAGE}`);
       if (!res.ok) throw new Error('Failed to fetch memories');
       const data = await res.json();
-      setMemories(data.memories || []);
+      const memories = data.memories || [];
+      
+      // Cache the result
+      setMemoryCache(memories, 30000); // 30 seconds TTL
+      
+      setMemories(memories);
     } catch (err) {
       setError('Failed to load memories');
       console.error(err);
@@ -219,7 +236,7 @@ export function ObsidianGraph2D({ onSelectMemory }: ObsidianGraph2DProps) {
       }}>
         <div style={{ color: 'var(--negative)', fontSize: '14px' }}>{error}</div>
         <button
-          onClick={fetchMemories}
+          onClick={() => fetchMemories(true)}
           style={{
             padding: '8px 16px',
             borderRadius: '8px',
