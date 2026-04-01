@@ -1,71 +1,98 @@
 {
-  "lastUpdated": "2026-04-01T02:00:00.000Z",
+  "lastUpdated": "2026-04-01T02:30:00.000Z",
   "actionRequired": [
     "⚠️ Activity Timeline Sync: 50 consecutive errors - Telegram delivery requires chatId",
-    "⚠️ Dashboard Update cron: LiveSessionModelSwitchError",
-    "⚠️ Session PostgreSQL Sync: LiveSessionModelSwitchError",
-    "⚠️ WhatsApp outbound not configured for multiple jobs"
+    "⚠️ Dashboard Update cron: LiveSessionModelSwitchError (model switch issue)",
+    "⚠️ Session PostgreSQL Sync: LiveSessionModelSwitchError (model switch issue)",
+    "⚠️ WhatsApp outbound not configured for multiple jobs (Start of Day, Daily Briefing, Weekly Review)",
+    "⚠️ sessions_list endpoint timeout - gateway connectivity issue"
   ],
   "activeNow": [],
   "crons": {
-    "total": 45,
-    "enabled": 42,
-    "disabled": 3,
+    "total": 39,
+    "enabled": 39,
+    "disabled": 0,
     "errorCount": 7,
-    "okCount": 35,
+    "okCount": 32,
     "running": [
       {
         "id": "2451cb36-cee9-48f4-b032-1086e387b078",
         "name": "Mission Control Dashboard Auto-Update",
         "status": "running",
-        "nextRun": "2026-04-01T02:20:00.000Z"
+        "startedAt": "2026-04-01T02:30:00.025Z"
       }
     ],
     "recentErrors": [
       {
         "name": "Activity Timeline Sync",
         "consecutiveErrors": 50,
-        "lastError": "Delivering to Telegram requires target <chatId>"
+        "lastError": "Delivering to Telegram requires target <chatId>",
+        "lastRun": "2026-04-01T01:56:04.716Z"
       },
       {
-        "name": "Dashboard Update",
+        "name": "Recipe Collector Daily Multilingual Fetch",
         "consecutiveErrors": 1,
-        "lastError": "LiveSessionModelSwitchError: Live session model switch requested"
-      },
-      {
-        "name": "Session PostgreSQL Sync",
-        "consecutiveErrors": 1,
-        "lastError": "LiveSessionModelSwitchError: Live session model switch requested"
+        "lastError": "Outbound not configured for channel: telegram",
+        "lastRun": "2026-03-30T04:42:12.552Z"
       },
       {
         "name": "Start of Day - Postgres Recall + Priorities",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp"
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "lastRun": "2026-03-31T04:30:00.019Z"
       },
       {
         "name": "Munkaoptimalizálás - Daily Briefing (Morzsa)",
         "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp"
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "lastRun": "2026-03-31T05:30:00.014Z"
+      },
+      {
+        "name": "Dashboard Update",
+        "consecutiveErrors": 1,
+        "lastError": "LiveSessionModelSwitchError: Live session model switch requested",
+        "lastRun": "2026-03-31T18:00:09.241Z"
+      },
+      {
+        "name": "Session PostgreSQL Sync",
+        "consecutiveErrors": 1,
+        "lastError": "LiveSessionModelSwitchError: Live session model switch requested",
+        "lastRun": "2026-03-31T18:00:00.033Z"
+      },
+      {
+        "name": "Weekly Review (Analyzer)",
+        "consecutiveErrors": 1,
+        "lastError": "Outbound not configured for channel: whatsapp",
+        "lastRun": "2026-03-30T17:00:00.014Z"
       }
     ],
     "upcoming": [
-      { "name": "Activity Timeline Sync", "nextRun": "2026-04-01T02:10:02.459Z" },
-      { "name": "Mission Control Dashboard Auto-Update", "nextRun": "2026-04-01T02:30:00.000Z" },
-      { "name": "Recipe Collector Daily Fetch", "nextRun": "2026-04-01T04:00:00.000Z" },
-      { "name": "Start of Day - Postgres Recall + Priorities", "nextRun": "2026-04-01T04:30:00.000Z" },
-      { "name": "Családi Események Emlékeztető", "nextRun": "2026-04-01T05:00:00.000Z" }
+      { "name": "Activity Timeline Sync", "nextRun": "2026-04-01T02:30:02.459Z", "schedule": "*/5 * * * *" },
+      { "name": "Mission Control Dashboard Auto-Update", "nextRun": "2026-04-01T03:00:00.000Z", "schedule": "*/30 * * * *" },
+      { "name": "Recipe Collector Daily Multilingual Fetch", "nextRun": "2026-04-01T04:00:00.000Z", "schedule": "0 6 * * *" },
+      { "name": "Recipe Collector Daily Fetch", "nextRun": "2026-04-01T04:00:00.000Z", "schedule": "0 6 * * *" },
+      { "name": "Start of Day - Postgres Recall + Priorities", "nextRun": "2026-04-01T04:30:00.000Z", "schedule": "30 6 * * 1-5" },
+      { "name": "Családi Események Emlékeztető", "nextRun": "2026-04-02T06:00:00.000Z", "schedule": "0 9 * * *" },
+      { "name": "Munkaoptimalizálás - Daily Briefing", "nextRun": "2026-04-01T05:30:00.000Z", "schedule": "30 7 * * 1-5" }
+    ],
+    "recentlyCompleted": [
+      { "name": "PostgreSQL Memory Backup", "lastRun": "2026-03-31T03:00:00.022Z", "status": "ok", "duration": "29s" },
+      { "name": "Családi Események Emlékeztető", "lastRun": "2026-03-31T06:00:02.878Z", "status": "ok", "duration": "52s" },
+      { "name": "Memória Cleanup + Index Rebuild", "lastRun": "2026-03-29T18:00:09.372Z", "status": "ok", "duration": "130s" },
+      { "name": "Full System Optimization", "lastRun": "2026-03-29T16:00:00.016Z", "status": "ok", "duration": "203s" }
     ]
   },
   "recentActivity": [
-    { "time": "2026-04-01T02:00:00.008Z", "event": "Mission Control Dashboard Auto-Update started" },
+    { "time": "2026-04-01T02:30:00.025Z", "event": "Mission Control Dashboard Auto-Update started" },
+    { "time": "2026-04-01T02:00:08.008Z", "event": "Mission Control Dashboard Auto-Update started" },
     { "time": "2026-04-01T01:56:04.716Z", "event": "Activity Timeline Sync error (50th consecutive)" },
-    { "time": "2026-04-01T01:30:00.029Z", "event": "Mission Control Dashboard Auto-Update completed (134s)" },
-    { "time": "2026-03-31T18:00:00.222Z", "event": "PostgreSQL Memory Backup completed" },
-    { "time": "2026-03-31T12:00:02.878Z", "event": "Családi Események Emlékeztető delivered" }
+    { "time": "2026-04-01T01:30:00.029Z", "event": "Mission Control Dashboard Auto-Update completed (100s)" },
+    { "time": "2026-03-31T03:00:00.022Z", "event": "PostgreSQL Memory Backup completed (29s)" }
   ],
   "systemHealth": {
     "sessionsList": "timeout",
     "cronScheduler": "ok",
-    "gateway": "ok"
+    "gateway": "ok",
+    "postgres": "ok"
   }
 }
