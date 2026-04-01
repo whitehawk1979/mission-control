@@ -1,98 +1,213 @@
 {
-  "lastUpdated": "2026-04-01T02:30:00.000Z",
+  "lastUpdated": "2026-04-01T03:13:00.000Z",
+  "lastUpdatedHuman": "2026. 04. 01. 05:13:00 (UTC+2)",
+  "systemHealth": {
+    "status": "healthy",
+    "issues": 0,
+    "details": []
+  },
   "actionRequired": [
-    "⚠️ Activity Timeline Sync: 50 consecutive errors - Telegram delivery requires chatId",
-    "⚠️ Dashboard Update cron: LiveSessionModelSwitchError (model switch issue)",
-    "⚠️ Session PostgreSQL Sync: LiveSessionModelSwitchError (model switch issue)",
-    "⚠️ WhatsApp outbound not configured for multiple jobs (Start of Day, Daily Briefing, Weekly Review)",
-    "⚠️ sessions_list endpoint timeout - gateway connectivity issue"
+    {
+      "level": "warning",
+      "source": "cron",
+      "message": "Recipe Collector Daily Multilingual Fetch failed",
+      "timestamp": "2026-03-31T08:42:10.700Z"
+    },
+    {
+      "level": "warning",
+      "source": "cron",
+      "message": "recipe-collector-daily failed",
+      "timestamp": "2026-03-31T08:26:35.793Z"
+    },
+    {
+      "level": "warning",
+      "source": "cron",
+      "message": "Recipe Collector Daily Fetch failed",
+      "timestamp": "2026-03-31T08:00:05.196Z"
+    }
   ],
-  "activeNow": [],
+  "activeNow": [
+    {
+      "id": "agent:morzsa:cron:2451cb36-cee9-48f4-b032-1086e387b078",
+      "name": "Mission Control Dashboard Auto-Update",
+      "agent": "morzsa",
+      "type": "cron",
+      "status": "running",
+      "startedAt": "2026-04-01T03:13:23.236Z",
+      "runtime": "aktív"
+    },
+    {
+      "id": "agent:morzsa:cron:434fa7c3-103f-45a3-bfa9-73bc829e5f8b",
+      "name": "Activity Timeline Sync",
+      "agent": "morzsa",
+      "type": "cron",
+      "status": "running",
+      "startedAt": "2026-03-31T09:27:29.310Z",
+      "runtime": "~18 óra"
+    },
+    {
+      "id": "agent:pajti:cron:acd86258-87d7-4a08-aa09-26387c156dda",
+      "name": "Dashboard Update",
+      "agent": "pajti",
+      "type": "cron",
+      "status": "running",
+      "startedAt": "2026-03-30T10:43:00.502Z",
+      "runtime": "~41 óra"
+    },
+    {
+      "id": "agent:pajti:cron:fba27730-005a-48fe-b75d-02c48551dd69",
+      "name": "Session PostgreSQL Sync",
+      "agent": "pajti",
+      "type": "cron",
+      "status": "running",
+      "startedAt": "2026-03-30T10:40:02.558Z",
+      "runtime": "~41 óra"
+    }
+  ],
+  "brain": {
+    "status": "connected",
+    "uptimeMinutes": 2073,
+    "memoryMB": 16,
+    "tools": [
+      {
+        "name": "health",
+        "description": "Health check endpoint"
+      },
+      {
+        "name": "status",
+        "description": "System status"
+      },
+      {
+        "name": "tools",
+        "description": "List available tools"
+      },
+      {
+        "name": "memory_recall",
+        "description": "Recall relevant memories from PostgreSQL"
+      },
+      {
+        "name": "context_get",
+        "description": "Get current agent context"
+      },
+      {
+        "name": "context_set",
+        "description": "Set agent context for reasoning"
+      },
+      {
+        "name": "decision_log",
+        "description": "Log a decision for future reasoning"
+      },
+      {
+        "name": "decision_recall",
+        "description": "Recall similar past decisions"
+      },
+      {
+        "name": "kpi_analyze",
+        "description": "Analyze KPIs and trends"
+      },
+      {
+        "name": "agent_status",
+        "description": "Get status of all agents"
+      }
+    ],
+    "lastActivity": "2026-04-01T03:13:00.000Z"
+  },
   "crons": {
-    "total": 39,
-    "enabled": 39,
+    "total": 8,
+    "enabled": 8,
     "disabled": 0,
-    "errorCount": 7,
-    "okCount": 32,
-    "running": [
+    "summary": {
+      "ok": 5,
+      "error": 3,
+      "pending": 0
+    },
+    "withErrors": [
       {
-        "id": "2451cb36-cee9-48f4-b032-1086e387b078",
-        "name": "Mission Control Dashboard Auto-Update",
-        "status": "running",
-        "startedAt": "2026-04-01T02:30:00.025Z"
-      }
-    ],
-    "recentErrors": [
-      {
-        "name": "Activity Timeline Sync",
-        "consecutiveErrors": 50,
-        "lastError": "Delivering to Telegram requires target <chatId>",
-        "lastRun": "2026-04-01T01:56:04.716Z"
-      },
-      {
+        "id": "0e6f6b9d-d867-45aa-a91f-c434eb8c73cc",
         "name": "Recipe Collector Daily Multilingual Fetch",
-        "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: telegram",
-        "lastRun": "2026-03-30T04:42:12.552Z"
+        "agent": "morzsa",
+        "status": "failed",
+        "lastRun": "2026-03-31T08:42:17.079Z",
+        "error": "timeout"
       },
       {
-        "name": "Start of Day - Postgres Recall + Priorities",
-        "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp",
-        "lastRun": "2026-03-31T04:30:00.019Z"
+        "id": "799b8cbf-890d-495a-ae04-e54c703efbd5",
+        "name": "recipe-collector-daily",
+        "agent": "morzsa",
+        "status": "failed",
+        "lastRun": "2026-03-31T08:24:18.574Z",
+        "error": "timeout"
       },
       {
-        "name": "Munkaoptimalizálás - Daily Briefing (Morzsa)",
-        "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp",
-        "lastRun": "2026-03-31T05:30:00.014Z"
-      },
-      {
-        "name": "Dashboard Update",
-        "consecutiveErrors": 1,
-        "lastError": "LiveSessionModelSwitchError: Live session model switch requested",
-        "lastRun": "2026-03-31T18:00:09.241Z"
-      },
-      {
-        "name": "Session PostgreSQL Sync",
-        "consecutiveErrors": 1,
-        "lastError": "LiveSessionModelSwitchError: Live session model switch requested",
-        "lastRun": "2026-03-31T18:00:00.033Z"
-      },
-      {
-        "name": "Weekly Review (Analyzer)",
-        "consecutiveErrors": 1,
-        "lastError": "Outbound not configured for channel: whatsapp",
-        "lastRun": "2026-03-30T17:00:00.014Z"
+        "id": "4d1f096b-4205-4ba2-b684-8a9c22d56b31",
+        "name": "Recipe Collector Daily Fetch",
+        "agent": "morzsa",
+        "status": "failed",
+        "lastRun": "2026-03-31T08:00:21.075Z",
+        "error": "timeout"
       }
     ],
-    "upcoming": [
-      { "name": "Activity Timeline Sync", "nextRun": "2026-04-01T02:30:02.459Z", "schedule": "*/5 * * * *" },
-      { "name": "Mission Control Dashboard Auto-Update", "nextRun": "2026-04-01T03:00:00.000Z", "schedule": "*/30 * * * *" },
-      { "name": "Recipe Collector Daily Multilingual Fetch", "nextRun": "2026-04-01T04:00:00.000Z", "schedule": "0 6 * * *" },
-      { "name": "Recipe Collector Daily Fetch", "nextRun": "2026-04-01T04:00:00.000Z", "schedule": "0 6 * * *" },
-      { "name": "Start of Day - Postgres Recall + Priorities", "nextRun": "2026-04-01T04:30:00.000Z", "schedule": "30 6 * * 1-5" },
-      { "name": "Családi Események Emlékeztető", "nextRun": "2026-04-02T06:00:00.000Z", "schedule": "0 9 * * *" },
-      { "name": "Munkaoptimalizálás - Daily Briefing", "nextRun": "2026-04-01T05:30:00.000Z", "schedule": "30 7 * * 1-5" }
-    ],
-    "recentlyCompleted": [
-      { "name": "PostgreSQL Memory Backup", "lastRun": "2026-03-31T03:00:00.022Z", "status": "ok", "duration": "29s" },
-      { "name": "Családi Események Emlékeztető", "lastRun": "2026-03-31T06:00:02.878Z", "status": "ok", "duration": "52s" },
-      { "name": "Memória Cleanup + Index Rebuild", "lastRun": "2026-03-29T18:00:09.372Z", "status": "ok", "duration": "130s" },
-      { "name": "Full System Optimization", "lastRun": "2026-03-29T16:00:00.016Z", "status": "ok", "duration": "203s" }
+    "recentSuccessful": [
+      {
+        "id": "06587db7-d011-4a31-9fc8-5dc9ca145656",
+        "name": "Memorable dates reminder",
+        "agent": "pajti",
+        "lastRun": "2026-03-31T06:00:02.904Z",
+        "status": "done"
+      },
+      {
+        "id": "8acfc5aa-4aae-432d-adfa-a4be8f54241f",
+        "name": "PostgreSQL Memory Backup",
+        "agent": "pajti",
+        "lastRun": "2026-03-31T06:00:00.034Z",
+        "status": "done"
+      }
     ]
   },
   "recentActivity": [
-    { "time": "2026-04-01T02:30:00.025Z", "event": "Mission Control Dashboard Auto-Update started" },
-    { "time": "2026-04-01T02:00:08.008Z", "event": "Mission Control Dashboard Auto-Update started" },
-    { "time": "2026-04-01T01:56:04.716Z", "event": "Activity Timeline Sync error (50th consecutive)" },
-    { "time": "2026-04-01T01:30:00.029Z", "event": "Mission Control Dashboard Auto-Update completed (100s)" },
-    { "time": "2026-03-31T03:00:00.022Z", "event": "PostgreSQL Memory Backup completed (29s)" }
+    {
+      "type": "cron",
+      "name": "Mission Control Dashboard Auto-Update",
+      "agent": "morzsa",
+      "status": "running",
+      "timestamp": "2026-04-01T03:13:23.236Z"
+    },
+    {
+      "type": "session",
+      "name": "Activity Timeline Sync",
+      "agent": "morzsa",
+      "status": "running",
+      "timestamp": "2026-04-01T03:10:02.502Z"
+    },
+    {
+      "type": "session",
+      "name": "heartbeat",
+      "agent": "morzsa",
+      "status": "done",
+      "timestamp": "2026-04-01T03:04:07.880Z"
+    },
+    {
+      "type": "session",
+      "name": "Telegram session",
+      "agent": "morzsa",
+      "status": "done",
+      "timestamp": "2026-03-31T11:19:02.956Z"
+    },
+    {
+      "type": "session",
+      "name": "WhatsApp direct session",
+      "agent": "morzsa",
+      "status": "done",
+      "timestamp": "2026-03-31T10:39:02.467Z"
+    }
   ],
-  "systemHealth": {
-    "sessionsList": "timeout",
-    "cronScheduler": "ok",
-    "gateway": "ok",
-    "postgres": "ok"
+  "stats": {
+    "totalSessions": 194,
+    "activeSessions": 4,
+    "completedSessions": 190,
+    "totalCrons": 8,
+    "healthyCrons": 5,
+    "errorCrons": 3,
+    "pendingReminders": 0
   }
 }
