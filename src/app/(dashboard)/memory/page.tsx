@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 
 // Lazy load 3D graph
 const MemoryGraph3D = dynamic(
-  () => import("@/components/MemoryGraph3D"),
+  () => import("@/components/MemoryGraph3D").then((mod) => mod.default),
   {
     ssr: false,
     loading: () => (
@@ -249,7 +249,7 @@ export default function MemoryPage() {
       {/* Content */}
       {tabMode === "graph3d" ? (
         <div style={{ flex: 1, minHeight: 0, backgroundColor: "var(--bg)" }}>
-          <MemoryGraph3D files={files} />
+          <MemoryGraph3D />
         </div>
       ) : tabMode === "graph2d" ? (
         <div style={{ flex: 1, minHeight: 0, backgroundColor: "var(--card)", borderRadius: "12px", margin: "0 24px 24px" }}>
